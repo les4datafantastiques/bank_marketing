@@ -1,0 +1,30 @@
+Nom de la colonne;Description;Type info.;Taux de NaN;Distribution des valeurs;Type de variable;Commentaire / Retraitements à réaliser
+age;âge du client lors du dépôt;int64;0 %;de 18 à 95 ans avec une concentration entre 32 (Q1) et 49 (Q3) ans;quantitative;"Distribution cohérente mais très concentrée autour de la médiane ;
+Pas de retraitement, la création de catégories pourra néanmoins servir pour le profiling"
+job;métier pratiqué;object;1 %;['admin.' 'technician' 'services' 'management' 'retired' 'blue-collar' 'unemployed' 'entrepreneur' 'housemaid' 'unknown' 'self-employed' 'student'];catégorielle;"70 lignes « unknown », impact dérisoire étant donné la volumétrie totale (+ de 11 000 lignes) ;
+Supprimer les lignes dont la donnée est manquante"
+marital;statut marital;object;0 %;['married' 'single' 'divorced'];catégorielle;
+education;niveau d'études;object;4 %;['secondary' 'tertiary' 'primary' 'unknown'];catégorielle;"497 lignes « unknown » ;
+Contrôle des valeurs prises par education pour chacun des jobs. Le résultat de ce test fait ressortir un type d’education clairement défini pour chaque job, sauf pour retired et entrepreneur où le résultat est moins flagrant. Etant donné le faible nombre d’occurrences de ces 2 jobs, nous pouvons en faire abstraction et appliquer une méthode commune pour tout le dataset : remplacement des valeurs « unknown » par la modalité la plus fréquente de education pour le job de la ligne concernée."
+default;le crédit est-il en défaut ?;object;0 %;['yes' 'no'];catégorielle;Très peu de défauts de crédit dans le dataset
+balance;solde bancaire annuel moyen;int64;0 %;de -6847 à 81 204 euros avec une concentration entre 122 (Q1) et 1708 (Q3);quantitative;"Distribution concentrée autour de la médiane, pas de valeurs aberrantes ;
+Pas de retraitement, la création de catégories pourra néanmoins servir pour le profiling"
+housing;le client bénéficie-t-il d’un crédit immobilier ?;object;0 %;['yes' 'no'];catégorielle;
+loan;le client bénéficie-t-il d’un prêt personnel ?;object;0 %;['yes' 'no'];catégorielle;Très peu de prêts personnels dans le dataset
+contact;moyen de contacter le client;object;21 %;['unknown' 'cellular' 'telephone'];catégorielle;"Donnée peu pertinente : proportion beaucoup plus importante de cellular, pour « unknown » beaucoup de non souscriptions ;
+Supprimer la colonne"
+day;jour du dernier contact;int64;0 %;jours du mois de 1 à 31;catégorielle;Trop de valeurs pour faire du OneHotEncoding, pas de retraitement
+month;mois du dernier contact;object;0 %;12 mois de janvier à décembre;catégorielle;"Faibles retours au mois de mai > à éviter pour les prospections ;
+Bons retours en mars/avril/septembre/octobre/décembre > à privilégier ;
+OneHotEncoding à réaliser à l’étape ML"
+duration;durée du dernier contact téléphonique (en seconde);int64;0 %;de 2 à 3881 secondes (64,68 minutes) avec concentration entre 138 (Q1) et 496 (Q3);quantitative;"En théorie, pour le ML, une variable doit être connue a priori, ce qui n’est pas le cas. Nous verrons par la suite, lors de l’interprétation de nos modèles, si cette variable est importante ou non pour la prédiction.
+Si elle figure dans le top 5 des variables utilisées par le modèle, nous la conserverons. Sinon, nous la supprimerons pour le ML, mais nous la conserverons pour émettre des recommandations métier."
+campaign;nombre de contacts effectués pendant cette campagne pour ce client (y compris le dernier contact);int64;0 %;de 1 à 63 avec une concentration entre 1 (Q1) et 3 (Q3);quantitative;
+pdays;nombre de jours écoulés depuis le dernier contact pour une campagne précédente;int64;0 %;de -1 à 854;quantitative;"Pour tous les pdays à « -1 », poutcome est « unknown » (8 324 valeurs). Par contre, pour poutcome à « unknown » (8 863 valeurs), pdays varie entre -1 et 391 ;
+Postulat : pdays à -1 indique que le client n’a jamais été contacté auparavant"
+previous;nombre de contacts effectués avant cette campagne pour ce client;int64;0 %;de 0 à 58;quantitative;
+poutcome;résultat de la campagne marketing précédente;object;75 %;['unknown' 'other' 'failure' 'success'];catégorielle;"Beaucoup de données « unknown » et « other », on ne peut donc pas supprimer les lignes dont la donnée est manquante ;
+Colonne qui reste intéressante car un précédent succès peut amener une nouvelle souscription > colonne à conserver malgré le fait qu’elle ne soit pas assez complétée ;
+Suite à notre analyse entre pdays et poutcome, nous partons de l’hypothèse que « unknown » nous indique que le client n’a jamais été contacté auparavant. Cette donnée devenant donc une information à part entière, nous conserverons les 4 catégories de valeurs"
+deposit;le client a-t-il souscrit un dépôt à terme ?;object;0 %;['yes' 'no'];catégorielle;"Variable cible ;
+Pas de retraitement nécessaire"
