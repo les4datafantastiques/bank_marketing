@@ -111,7 +111,7 @@ if page == pages[1]:
             st.markdown(df_bank[column].unique())
     st.markdown("Le dataframe ne contient aucune valeur manquante à proprement parler mais comprends des champs renseignés unknown à retraiter.")
     st.markdown("**Description des variables quantitatives :**")
-    st.table(df_bank.describe())
+    st.table(df_bank.describe().astype(int).map(lambda x: f"{x:,}".replace(",", " ")).style.set_properties(**{'text-align': 'right'}))
     if st.checkbox("Afficher le détail des informations sur les variables du dataframe"):
         st.markdown("**Récapitulatif des informations dont nous disposons sur les différentes variables du dataset :**")
         st.table(df_pertinence)
