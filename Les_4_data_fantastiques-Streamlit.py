@@ -510,8 +510,8 @@ df_bank_2.to_csv('bank_2.csv', index=False, sep=',')
 
 
 # Exploitation d'un fichier .md pour la rubrique classification de la page de modélisation du projet
-f = open('classification.md')
-txt_classification = f.read()
+f = open('modelisation.md')
+txt_modelisation = f.read()
 
 
 # df = df_bank_1
@@ -544,7 +544,7 @@ models = {
 
 if page == pages[3]:
     st.header(pages[3])
-    st.markdown(txt_classification)
+    st.markdown(txt_modelisation)
 
 
 
@@ -556,8 +556,10 @@ if page == pages[4]:
 #    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres ?", ("Oui", "Non"))
     if traitement_duration == "Conserver la colonne duration":
         df = df_bank_1
+        var_num = ["age","balance","duration","campaign","pdays","previous"]
     else :
         df = df_bank_2
+        var_num = ["age","balance","campaign","pdays","previous"]
     data = df.drop("deposit", axis = 1)
     target = df["deposit"]
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.3, random_state = 88)
