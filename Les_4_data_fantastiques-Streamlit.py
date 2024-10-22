@@ -630,8 +630,9 @@ if page == pages[4]:
         else:
             st.write("Ce modèle ne possède pas d'attribut feature_importances_ ou coef_")
     recap_resultats = pd.DataFrame(resultats)
+    st.write("#### Récapitulatif des performances des différents modèles selon les paramètres choisis")
     st.dataframe(recap_resultats)
-
+    st.write("#### Importances des variables pour chacun des modèles selon les paramètres choisis")
     recap_importances = pd.DataFrame(features).T  # Transposition pour avoir les variables en ligne
     st.table(recap_importances)
 
