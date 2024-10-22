@@ -10,6 +10,22 @@ import io
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import xgboost as xgb
+
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import RobustScaler, OneHotEncoder, LabelEncoder, OrdinalEncoder
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.compose import ColumnTransformer
+from sklearn.inspection import permutation_importance
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn import neighbors
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from xgboost import XGBClassifier
+from catboost import CatBoostClassifier
+
 
 # Création d'un dataframe pour lire le data set
 df_bank = pd.read_csv("bank.csv", sep = ",")
@@ -446,20 +462,176 @@ if page == pages[2]:
 
 
 
+jobs_education = {}
+for element in df_bank["job"].unique():
+    selection_job = df_bank.loc[df_bank["job"]== element]
+    valeurs_job = selection_job["education"].value_counts()
+    mode_job = selection_job["education"].mode()[0]
+    jobs_education[element] = mode_job
+
+# RETRAITEMENTS POUR GENERER df_bank_0 (Base utilisée uniquement pour le profiling)
+
+# Création d'un dataframe df_bank_0 copie de df_bank :
+df_bank_0 = df_bank.copy()
+# Création d'une fonction qui définit la catégorie d'âge sur la base de "age":
+def get_categ(age):
+	if age <= 31:
+		categ = "extreme_bas"
+	elif 31 < age <= 40:
+		categ = "jeune"
+	elif 30 < age <= 49:
+		categ = "moins_jeune"
+	elif 49 < age:
+		categ = "extreme_haut"
+	return categ
+df_bank_0["age_categ"] = df_bank_0["age"].apply(get_categ)
+# Export du dataframe df_bank_1 en fichier .csv
+df_bank_0.to_csv('bank_0_profiling.csv', index=False, sep=',')
+
+
+# RETRAITEMENTS POUR GENERER df_bank_1 (retraitements de base)
+
+# Suppression des lignes dont la valeur "job" est manquante :
+df_bank_1 = df_bank.loc[df_bank["job"] != "unknown"]
+# Remplacement des unknown de "education" par la modalité la plus fréquente rencontrée pour un "job" identique :
+df_bank_1.loc[df_bank_1["education"] == "unknown", "education"] = df_bank_1.loc[df_bank_1["education"] == "unknown", "job"].map(jobs_education)		
+# Suppression de la colonne "contact" :
+df_bank_1 = df_bank_1.drop("contact", axis=1)
+# Export du dataframe df_bank_1 en fichier .csv
+df_bank_1.to_csv('bank_1.csv', index=False, sep=',')
+
+
+# RETRAITEMENTS SUPPLEMENTAIRES POUR GENERER df_bank_2 (sans duration)
+
+# Suppression de la colonne "duration" :
+df_bank_2 = df_bank_1.drop("duration", axis=1)
+# Export du dataframe df_bank_2 en fichier .csv
+df_bank_2.to_csv('bank_2.csv', index=False, sep=',')
+
 
 # Exploitation d'un fichier .md pour la rubrique classification de la page de modélisation du projet
-#f = open('classification_probleme.md')
-#txt_classification = f.read()
+f = open('classification.md')
+txt_classification = f.read()
+
+
+# df = df_bank_1
+
+# data = df.drop("deposit", axis = 1)
+# target = df["deposit"]
+
+# X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.3, random_state = 88)
+
+le = LabelEncoder()
+ohe = OneHotEncoder(drop = "first")
+oe = OrdinalEncoder(categories = [["primary", "secondary", "tertiary"]])
+num_scaler = RobustScaler()
+
+# prepro = ColumnTransformer(transformers = [("numerical", num_scaler, var_num), ("categorical_ohe", ohe, var_cat_for_ohe), ("categorical_oe", oe, ["education"])])
+
+models = {
+        "Logistic Regression": LogisticRegression(),
+        "SVM": SVC(),
+        "KNN" : neighbors.KNeighborsClassifier(),
+        "Decision Tree Classif": DecisionTreeClassifier(),
+        "Decision Tree Regress": DecisionTreeRegressor(),
+        "Random Forest": RandomForestClassifier(),
+        "Extreme Gradient" : XGBClassifier(),
+        "Gradient Boost" : GradientBoostingClassifier(),
+        "CatBoost" : CatBoostClassifier()
+        }
+
 
 
 if page == pages[3]:
     st.header(pages[3])
-#    st.markdown(txt_classification)
+    st.markdown(txt_classification)
 
 
 
 if page == pages[4]:
     st.header(pages[4])
+    traitement_duration = st.radio("Choisissez le traitement à appliquer à la colonne duration :", ("Conserver la colonne duration", "Supprimer la colonne duration"))
+    traitement_var_num = st.radio("Choisissez le traitement des variables numériques :", ("Avec RobustScaling", "Sans RobustScaling"))
+    traitement_education = st.radio("Choisissez le traitement de la variable education :", ("Ordinal Encoding", "OneHotEncoding"))
+#    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres ?", ("Oui", "Non"))
+    if traitement_duration == "Conserver la colonne duration":
+        df = df_bank_1
+    else :
+        df = df_bank_2
+    data = df.drop("deposit", axis = 1)
+    target = df["deposit"]
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.3, random_state = 88)
+    if traitement_var_num == "Avec RobustScaling":
+        if traitement_education == "Ordinal Encoding":
+            var_cat_for_ohe = ["job","marital","default","housing","loan","day","month","poutcome"]
+            prepro = ColumnTransformer(transformers = [("numerical", num_scaler, var_num), ("categorical_ohe", ohe, var_cat_for_ohe), ("categorical_oe", oe, ["education"])])
+        else:
+            var_cat_for_ohe = ["job","marital", "education","default","housing","loan","day","month","poutcome"]
+            prepro = ColumnTransformer(transformers = [("numerical", num_scaler, var_num), ("categorical_ohe", ohe, var_cat_for_ohe)])
+    else :
+        if traitement_education == "Ordinal Encoding":
+            var_cat_for_ohe = ["job","marital","default","housing","loan","day","month","poutcome"]
+            prepro = ColumnTransformer(transformers = [("numerical", "passthrough", var_num),("categorical_ohe", ohe, var_cat_for_ohe), ("categorical_oe", oe, ["education"])])
+        else : 
+            var_cat_for_ohe = ["job","marital", "education","default","housing","loan","day","month","poutcome"]
+            prepro = ColumnTransformer(transformers = [("numerical", "passthrough", var_num),("categorical_ohe", ohe, var_cat_for_ohe)])
+    X_train_prepro = prepro.fit_transform(X_train)
+    X_test_prepro = prepro.transform(X_test)
+    y_train = le.fit_transform(y_train)
+    y_test = le.transform(y_test)
+    resultats = []
+    features = {}
+    for model_name, model in models.items():
+        st.write("#### Modèle testé : " + model_name)
+        model.fit(X_train_prepro, y_train)
+        y_pred_train = model.predict(X_train_prepro)
+        y_pred_test = model.predict(X_test_prepro)
+        accuracy_train = accuracy_score(y_train, y_pred_train)
+        accuracy_test = accuracy_score(y_test, y_pred_test)
+        f1 = f1_score(y_test, y_pred_test)
+        precision = precision_score(y_test, y_pred_test)
+        recall = recall_score(y_test, y_pred_test)
+        resultats.append({
+            "Modèle": model_name,
+            "Accuracy train": accuracy_train,
+            "Accuracy test": accuracy_test,
+            "Score F1": f1,
+            "Précision": precision,
+            "Rappel": recall
+            })
+        st.write("Variables les plus importantes du modèle ", model_name)
+        nom_var = prepro.get_feature_names_out()
+        if hasattr(model, "feature_importances_"):
+            importance = model.feature_importances_
+            data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Variables", ascending = False)
+            top_data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Importance", ascending = False)
+            st.dataframe(top_data_importances.head(5))
+            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", title="Top 5 des variables du modèle " + model_name)
+            st.plotly_chart(fig)
+            for feature, importance in zip(nom_var, importance):
+                if feature not in features:
+                    features[feature] = {}
+                features[feature][model_name] = importance
+        elif model_name == "Logistic Regression":
+            coef = model.coef_[0]
+            data_importances = pd.DataFrame({"Variables": nom_var, "Coefficient": coef})
+            data_importances["Importance"] = data_importances["Coefficient"].abs()
+            data_importances = data_importances.sort_values(by = "Variables", ascending = False)
+            top_data_importances = data_importances.sort_values(by = "Importance", ascending = False)
+            st.dataframe(top_data_importances.head(5))
+            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", title="Top 5 des variables du modèle " + model_name)
+            st.plotly_chart(fig)
+            for feature, importance in zip(nom_var, data_importances["Importance"]):
+                if feature not in features:
+                    features[feature] = {}
+                features[feature][model_name] = importance
+        else:
+            st.write("Ce modèle ne possède pas d'attribut feature_importances_ ou coef_")
+    recap_resultats = pd.DataFrame(resultats)
+    st.dataframe(recap_resultats)
+
+    recap_importances = pd.DataFrame(features).T  # Transposition pour avoir les variables en ligne
+    st.table(recap_importances)
 
 
 
