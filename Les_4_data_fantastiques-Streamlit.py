@@ -92,9 +92,14 @@ Nos analyses macro font également ressortir quelques recommandations métier. L
 
 Pour affiner nos analyses et réussir à prédire si un prospect serait susceptible de souscrire ou non à un dépôt à terme, nous devons passer à l’étape de la modélisation. Néanmoins, avant cela, nous devons procéder aux retraitements suivants :
 * age : créer des catégories pour faciliter le traitement
-* job : supprimer les lignes dont la variable job est manquante
-* education : déduire les données manquantes du job associé (modalité education la plus fréquente pour le job en question)
-* contact : supprimer la colonne
+* job : 1% de valeurs "unknown"(soit 70 lignes), nous avons pris la décision de supprimer ces lignes qui sont peu nombreuses
+* education : 4% de valeurs "unknown" (soit 497 lignes), cette variable est importante et ces lignes sont trop nombreuses pour être supprimées. Nous avons donc décidé de compléter les valeurs manquantes. La variable education étant fortement corrélée avec la variable job, nous déduirons les données manquantes du job associé (modalité education la plus fréquente pour le job en question).
+* contact : 21% de valeurs "unknown". Après analyse nous avons décidé de supprimer cette colonne qui ne représente pas d'intérêt majeur pour la modélisation.
+
+Pour rappel : la variable poutcome restera inchangée.
+En effet, cette variable comporte trop de valeurs manquantes pour pouvoir supprimer des lignes (75% de valeurs "unknown"). 
+De plus, nous avons acté qu'elle était importante pour notre modélisation. 
+La valeur "unknown" de cette variable constituera donc une valeur à part entière dans notre projet.
 """
 
 
