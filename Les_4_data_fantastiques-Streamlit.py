@@ -576,11 +576,11 @@ param_grid = {
                             'n_neighbors': [3, 5, 7, 10],
                             'weights': ['uniform', 'distance']
                             },
-            'Extreme Gradient Boost': {
-                            'n_estimators': [100, 200, 300],
-                            'learning_rate': [0.01, 0.1, 0.2],
-                            'max_depth': [3, 5, 7]
-                            },
+#            'Extreme Gradient Boost': {
+#                            'n_estimators': [100, 200, 300],
+#                            'learning_rate': [0.01, 0.1, 0.2],
+#                            'max_depth': [3, 5, 7]
+#                            },
 #            'CatBoost': {
 #                            'iterations': [100, 200, 300],
 #                            'learning_rate': [0.01, 0.1, 0.2],
