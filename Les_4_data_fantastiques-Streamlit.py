@@ -93,7 +93,7 @@ Nos analyses macro font également ressortir quelques recommandations métier. L
 Pour affiner nos analyses et réussir à prédire si un prospect serait susceptible de souscrire ou non à un dépôt à terme, nous devons passer à l’étape de la modélisation. Néanmoins, avant cela, nous devons procéder aux retraitements suivants :
 * age : créer des catégories pour faciliter le traitement
 * job : 1% de valeurs "unknown"(soit 70 lignes), nous avons pris la décision de supprimer ces lignes qui sont peu nombreuses
-* education : 4% de valeurs "unknown" (soit 497 lignes), cette variable est importante et ces lignes sont trop nombreuses pour être supprimées. Nous avons donc décidé de compléter les valeurs manquantes. La variable education étant fortement corrélée avec la variable job, nous déduirons les données manquantes du job associé (modalité education la plus fréquente pour le job en question).
+* education : 4% de valeurs "unknown" (soit 497 lignes), cette variable est importante et ces lignes sont trop nombreuses pour être supprimées. Nous avons donc décidé de compléter les valeurs manquantes. La variable education étant fortement corrélée avec la variable job, nous déduirons les données manquantes du job associé (modalité education la plus fréquente pour le job en question)
 * contact : 21% de valeurs "unknown". Après analyse nous avons décidé de supprimer cette colonne qui ne représente pas d'intérêt majeur pour la modélisation.
 
 Pour rappel : la variable poutcome restera inchangée.
@@ -385,7 +385,7 @@ if page == visu:
             st.plotly_chart(fig_educ_job)
             st.write("Les variables job et educations semblent corrélées entre elles. Pour chaque job, une donnée education semble ressortir clairement de manière générale.")
             st.write("Le résultat est plus mitigé pour les retraités et entrepreneurs, mais le nombre de clients issus de ces catégories semble suffisamment faible pour pouvoir en faire abstraction.")
-            st.write("Nous pouvons donc en conclure que la variable education, lorsqu’elle est manquante dans le dataset, peut-être déduite de la variable job.")
+            st.write("Nous pouvons donc en conclure que la variable education, lorsqu’elle est manquante dans le dataset, peut être déduite de la variable job.")
         if choix_var_cat == "marital":
             st.write("Les clients mariés semblent moins enclins à souscrire un dépôt à terme suite à une campagne marketing. Les célibataires seront de meilleures cibles.")
         if choix_var_cat == "default":
@@ -526,7 +526,7 @@ txt_modelisation = f.read()
 # data = df.drop("deposit", axis = 1)
 # target = df["deposit"]
 
-# X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.3, random_state = 88)
+# X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.25, random_state = 88)
 
 le = LabelEncoder()
 ohe = OneHotEncoder(drop = "first")
@@ -540,7 +540,7 @@ models = {
         "SVM": SVC(),
         "KNN" : neighbors.KNeighborsClassifier(),
         "Decision Tree Classifier": DecisionTreeClassifier(),
-#        "Decision Tree Regressor": DecisionTreeRegressor(),
+        "Decision Tree Regressor": DecisionTreeRegressor(),
         "Random Forest": RandomForestClassifier(),
         "Gradient Boost" : GradientBoostingClassifier(),
         "Extreme Gradient Boost" : XGBClassifier(),
@@ -548,16 +548,59 @@ models = {
         }
 
 # Définition des hyperparamètres pour chaque modèle
+#param_grid = {
+#            'Logistic Regression': {
+#                            'C': [0.01, 0.1, 1, 10, 100],
+#                            'solver': ['liblinear', 'lbfgs'],
+#                            'max_iter': [100, 200, 1000]
+#                            },
+#            'Decision Tree Classifier': {
+#                            'max_depth': [None, 5, 10, 20],
+#                            'min_samples_split': [2, 5, 10]
+#                            },
+#            'Decision Tree Regressor': {},
+#            'Random Forest': {
+#                            'n_estimators': [50, 100, 200],
+#                            'max_depth': [None, 5, 10, 20],
+#                            'min_samples_split': [2, 5, 10]
+#                            },
+#            'Gradient Boost': {
+#                            'n_estimators': [50, 100, 200],
+#                            'learning_rate': [0.01, 0.1, 0.2],
+#                            'max_depth': [3, 5, 7]
+#                            },
+#            'SVM': {
+#                            'C': [0.01, 0.1, 1, 10, 100],
+#                            'kernel': ['linear', 'rbf']
+#                            },
+#            'KNN': {
+#                            'n_neighbors': [3, 5, 7, 10],
+#                            'weights': ['uniform', 'distance']
+#                            },
+#            'Extreme Gradient Boost': {
+#                            'n_estimators': [100, 200, 300],
+#                            'learning_rate': [0.01, 0.1, 0.2],
+#                            'max_depth': [3, 5, 7]
+#                            },
+#            'CatBoost': {
+#                            'iterations': [100, 200, 300],
+#                            'learning_rate': [0.01, 0.1, 0.2],
+#                            'depth': [6, 8, 10]
+#                            }
+#            }
+
+# Pour faire tourner les modèles avec les hyperparamètres définis dans un module à part en dur : 
 param_grid = {
             'Logistic Regression': {
-                            'C': [0.01, 0.1, 1, 10, 100],
-                            'solver': ['liblinear', 'lbfgs'],
-                            'max_iter': [100, 200, 1000]
+                            "C":[0.1],
+                            "max_iter":[100],
+                            "solver":["lbfgs"]
                             },
             'Decision Tree Classifier': {
-                            'max_depth': [None, 5, 10, 20],
-                            'min_samples_split': [2, 5, 10]
+                            "max_depth":[5],
+                            "min_samples_split":[2]
                             },
+#            'Decision Tree Regressor': {},
 #            'Random Forest': {
 #                            'n_estimators': [50, 100, 200],
 #                            'max_depth': [None, 5, 10, 20],
@@ -573,14 +616,14 @@ param_grid = {
 #                            'kernel': ['linear', 'rbf']
 #                            },
             'KNN': {
-                            'n_neighbors': [3, 5, 7, 10],
-                            'weights': ['uniform', 'distance']
+                            "n_neighbors":[10],
+                            "weights":["uniform"]
                             },
-#            'Extreme Gradient Boost': {
-#                            'n_estimators': [100, 200, 300],
-#                            'learning_rate': [0.01, 0.1, 0.2],
-#                            'max_depth': [3, 5, 7]
-#                            },
+            'Extreme Gradient Boost': {
+                            "learning_rate":[0.2],
+                            "max_depth":[3],
+                            "n_estimators":[100]
+                            },
 #            'CatBoost': {
 #                            'iterations': [100, 200, 300],
 #                            'learning_rate': [0.01, 0.1, 0.2],
@@ -597,10 +640,12 @@ if page == modelisation:
 
 if page == ml:
     st.header(ml)
-    traitement_duration = st.radio("Choisissez le traitement à appliquer à la colonne duration :", ("Conserver la colonne duration", "Supprimer la colonne duration"))
+    traitement_duration = st.radio("Choisissez le traitement à appliquer à la colonne duration :", ("Supprimer la colonne duration", "Conserver la colonne duration"))
     traitement_var_num = st.radio("Choisissez le traitement des variables numériques :", ("Avec RobustScaling", "Sans RobustScaling"))
     traitement_education = st.radio("Choisissez le traitement de la variable education :", ("Ordinal Encoding", "OneHotEncoding"))
-    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres ?", ("Non", "Oui"))
+#    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres ?", ("Non", "Oui"))
+    st.write("Pour des raisons d'optimisation des performances de la plateforme, nous ne ferons tourner GridSearch que sur les 3 modèles qui nous semblent être les plus performants, à savoir : ..., ... et ... .")
+    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres pour les 3 modèles les plus performants ?", ("Oui", "Non"))
     if traitement_duration == "Conserver la colonne duration":
         df = df_bank_1
         var_num = ["age","balance","duration","campaign","pdays","previous"]
