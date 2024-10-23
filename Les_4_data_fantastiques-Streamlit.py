@@ -16,7 +16,8 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import RobustScaler, OneHotEncoder, LabelEncoder, OrdinalEncoder
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.compose import ColumnTransformer
-from sklearn.inspection import permutation_importance
+#from sklearn.inspection import permutation_importance
+from sklearn.pipeline import Pipeline
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -24,7 +25,7 @@ from sklearn import neighbors
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
-from catboost import CatBoostClassifier
+from catboost import CatBoostClassifier, Pool
 
 
 # Création d'un dataframe pour lire le data set
@@ -32,7 +33,8 @@ df_bank = pd.read_csv("bank.csv", sep = ",")
 
 st.title("Bank Marketing")
 st.sidebar.title("Sommaire")
-pages=["Le projet","Le jeu de données","Quelques visualisations","Modélisation","Machine Learning","Conclusion"]
+projet, donnees, visu, modelisation, ml, conclusion = ("Le projet","Le jeu de données","Quelques visualisations","Modélisation","Machine Learning","Conclusion")
+pages=[projet, donnees, visu, modelisation, ml, conclusion]
 page=st.sidebar.radio("Aller vers :", pages)    
 
 # Exploitation d'un fichier .md pour la page de présentation du projet
@@ -99,12 +101,12 @@ Pour affiner nos analyses et réussir à prédire si un prospect serait suscepti
 
 
 
-if page == pages[0]:
-    st.header(pages[0])
+if page == projet:
+    st.header(projet)
     st.markdown(txt_projet)
     
-if page == pages[1]:
-    st.header(pages[1])
+if page == donnees:
+    st.header(donnees)
     st.markdown(txt_cadre)
     if st.checkbox("Afficher un aperçu des premières lignes du dataframe"):
         st.markdown("**Apercu du dataframe issu du dataset bank :**")
@@ -141,8 +143,8 @@ var_num = ["age","balance","duration","campaign","pdays","previous"]
 var_cat = ["job","marital","education","default","housing","loan","contact","day","month","poutcome","deposit"]
 
 
-if page == pages[2]:
-    st.header(pages[2])
+if page == visu:
+    st.header(visu)
     st.markdown("#### Répartition des modalités pour chacune des colonnes :")
     choix_type_var = st.selectbox("Choisissez le type de variable à afficher :", ("Variables quantitatives", "Variables catégorielles"))
     if choix_type_var == "Variables quantitatives":
@@ -529,31 +531,71 @@ num_scaler = RobustScaler()
 # prepro = ColumnTransformer(transformers = [("numerical", num_scaler, var_num), ("categorical_ohe", ohe, var_cat_for_ohe), ("categorical_oe", oe, ["education"])])
 
 models = {
-        "Logistic Regression": LogisticRegression(),
+        "Logistic Regression": LogisticRegression(max_iter = 1000),
         "SVM": SVC(),
         "KNN" : neighbors.KNeighborsClassifier(),
-        "Decision Tree Classif": DecisionTreeClassifier(),
-        "Decision Tree Regress": DecisionTreeRegressor(),
+        "Decision Tree Classifier": DecisionTreeClassifier(),
+#        "Decision Tree Regressor": DecisionTreeRegressor(),
         "Random Forest": RandomForestClassifier(),
-        "Extreme Gradient" : XGBClassifier(),
         "Gradient Boost" : GradientBoostingClassifier(),
-        "CatBoost" : CatBoostClassifier()
+        "Extreme Gradient Boost" : XGBClassifier(),
+#        "CatBoost" : CatBoostClassifier(silent = True)  # 'silent=True' pour éviter les logs
         }
 
+# Définition des hyperparamètres pour chaque modèle
+param_grid = {
+            'Logistic Regression': {
+                            'C': [0.01, 0.1, 1, 10, 100],
+                            'solver': ['liblinear', 'lbfgs'],
+                            'max_iter': [100, 200, 1000]
+                            },
+            'Decision Tree Classifier': {
+                            'max_depth': [None, 5, 10, 20],
+                            'min_samples_split': [2, 5, 10]
+                            },
+#            'Random Forest': {
+#                            'n_estimators': [50, 100, 200],
+#                            'max_depth': [None, 5, 10, 20],
+#                            'min_samples_split': [2, 5, 10]
+#                            },
+#            'Gradient Boost': {
+#                            'n_estimators': [50, 100, 200],
+#                            'learning_rate': [0.01, 0.1, 0.2],
+#                            'max_depth': [3, 5, 7]
+#                            },
+#            'SVM': {
+#                            'C': [0.01, 0.1, 1, 10, 100],
+#                            'kernel': ['linear', 'rbf']
+#                            },
+            'KNN': {
+                            'n_neighbors': [3, 5, 7, 10],
+                            'weights': ['uniform', 'distance']
+                            },
+            'Extreme Gradient Boost': {
+                            'n_estimators': [100, 200, 300],
+                            'learning_rate': [0.01, 0.1, 0.2],
+                            'max_depth': [3, 5, 7]
+                            },
+#            'CatBoost': {
+#                            'iterations': [100, 200, 300],
+#                            'learning_rate': [0.01, 0.1, 0.2],
+#                            'depth': [6, 8, 10]
+#                            }
+            }
 
 
-if page == pages[3]:
-    st.header(pages[3])
+if page == modelisation:
+    st.header(modelisation)
     st.markdown(txt_modelisation)
 
 
 
-if page == pages[4]:
-    st.header(pages[4])
+if page == ml:
+    st.header(ml)
     traitement_duration = st.radio("Choisissez le traitement à appliquer à la colonne duration :", ("Conserver la colonne duration", "Supprimer la colonne duration"))
     traitement_var_num = st.radio("Choisissez le traitement des variables numériques :", ("Avec RobustScaling", "Sans RobustScaling"))
     traitement_education = st.radio("Choisissez le traitement de la variable education :", ("Ordinal Encoding", "OneHotEncoding"))
-#    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres ?", ("Oui", "Non"))
+    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres ?", ("Non", "Oui"))
     if traitement_duration == "Conserver la colonne duration":
         df = df_bank_1
         var_num = ["age","balance","duration","campaign","pdays","previous"]
@@ -562,7 +604,7 @@ if page == pages[4]:
         var_num = ["age","balance","campaign","pdays","previous"]
     data = df.drop("deposit", axis = 1)
     target = df["deposit"]
-    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.3, random_state = 88)
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.25, random_state = 88)
     if traitement_var_num == "Avec RobustScaling":
         if traitement_education == "Ordinal Encoding":
             var_cat_for_ohe = ["job","marital","default","housing","loan","day","month","poutcome"]
@@ -583,11 +625,30 @@ if page == pages[4]:
     y_test = le.transform(y_test)
     resultats = []
     features = {}
+    best_params_list = {}
     for model_name, model in models.items():
         st.write("#### Modèle testé : " + model_name)
-        model.fit(X_train_prepro, y_train)
-        y_pred_train = model.predict(X_train_prepro)
-        y_pred_test = model.predict(X_test_prepro)
+        pipeline = Pipeline(steps=[("preprocessing", prepro), ('model', model)])
+        if optimisation_hyperparam == "Oui":
+            if model_name in param_grid:  # Si des paramètres sont spécifiés pour ce modèle
+                grid_search = GridSearchCV(estimator=model, param_grid = param_grid[model_name], scoring='accuracy', cv=5)
+                grid_search.fit(X_train_prepro, y_train)
+                model = grid_search.best_estimator_  # Utiliser les meilleurs paramètres pour le modèle
+#                grid_search = GridSearchCV(pipeline, param_grid = param_grid[model_name], scoring='accuracy', cv=5)
+#                grid_search.fit(X_train, y_train)
+                best_params_list[model_name] = grid_search.best_params_  # Sauvegarder les meilleurs paramètres
+                y_pred_train = grid_search.predict(X_train_prepro)
+                y_pred_test = grid_search.predict(X_test_prepro)
+#               st.write("Hyperparamètres testés pour le modèle ", model_name)
+#               st.write(f"{model_name}: {params}")
+                st.write("Meilleurs hyperparamètres pour le modèle ", model_name)
+                st.write(grid_search.best_params_)
+            else:
+                st.write("Aucun hyperparamètre n'a été optimisé pour ce test.")
+        else:
+            model.fit(X_train_prepro, y_train)
+            y_pred_train = model.predict(X_train_prepro)
+            y_pred_test = model.predict(X_test_prepro)
         accuracy_train = accuracy_score(y_train, y_pred_train)
         accuracy_test = accuracy_score(y_test, y_pred_test)
         f1 = f1_score(y_test, y_pred_test)
@@ -604,6 +665,10 @@ if page == pages[4]:
         st.write("Variables les plus importantes du modèle ", model_name)
         nom_var = prepro.get_feature_names_out()
         if hasattr(model, "feature_importances_"):
+#            if model_name == "CatBoost":
+#                importance = model.get_feature_importance(Pool(X_train_prepro, y_train))
+#            else :
+#                importance = model.feature_importances_
             importance = model.feature_importances_
             data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Variables", ascending = False)
             top_data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Importance", ascending = False)
@@ -615,7 +680,11 @@ if page == pages[4]:
                     features[feature] = {}
                 features[feature][model_name] = importance
         elif model_name == "Logistic Regression":
-            coef = model.coef_[0]
+#            coef = model.coef_[0]
+            coef = model.coef_
+            if coef.ndim == 1:  # Si c'est un tableau 1D (ce qui arrive parfois en classification binaire)
+                coef = coef.reshape(1, -1)
+            coef = coef[0]
             data_importances = pd.DataFrame({"Variables": nom_var, "Coefficient": coef})
             data_importances["Importance"] = data_importances["Coefficient"].abs()
             data_importances = data_importances.sort_values(by = "Variables", ascending = False)
@@ -629,14 +698,22 @@ if page == pages[4]:
                 features[feature][model_name] = importance
         else:
             st.write("Ce modèle ne possède pas d'attribut feature_importances_ ou coef_")
+    st.write("#### Récapitulatif des meilleurs hyperparamètres")
+    if optimisation_hyperparam == "Oui":
+        for model_name, params in best_params_list.items():
+            st.write(f"{model_name}: {params}")
+    else:
+        st.write("Aucun hyperparamètre n'a été optimisé pour ces tests.")
     recap_resultats = pd.DataFrame(resultats)
-    st.write("#### Récapitulatif des performances des différents modèles selon les paramètres choisis")
+    st.write("#### Récapitulatif des performances des différents modèles")
+    st.write("**(selon les paramètres choisis précédemment)**")
     st.dataframe(recap_resultats)
-    st.write("#### Importances des variables pour chacun des modèles selon les paramètres choisis")
+    st.write("#### Importances des variables pour chacun des modèles")
+    st.write("**(selon les paramètres choisis précédemment)**")
     recap_importances = pd.DataFrame(features).T  # Transposition pour avoir les variables en ligne
     st.table(recap_importances)
 
 
 
-if page == pages[5]:
-    st.header(pages[5])
+if page == conclusion:
+    st.header(conclusion)

@@ -6,7 +6,7 @@ Nous devons donc mettre en place un modèle d’apprentissage supervisé suivant
 
 Le dataset ne présentant pas un grand volume, nous ne réduirons pas sa dimension lors de la modélisation.
 
-Nous diviserons les données en deux parties : 70% du dataset seront dédiés à l’entraînement et 30% du dataset seront dédiés à l’évaluation de notre modèle.
+Nous diviserons les données en deux parties : 75% du dataset seront dédiés à l’entraînement et 25% du dataset seront dédiés à l’évaluation de notre modèle.
 
 **Choix des métriques de performance**
 
@@ -21,7 +21,7 @@ Les métriques de performance principales utilisées pour comparer nos modèles�
 
 **Choix de l'encodage**
 
-Nos données ne comportent plus de valeurs manquantes mais contiennent encore des données quantitatives extrêmes. Nous avons décidé de les conserver car ces informations restent intéressantes pour notre modèle. Nous ne pouvons pas normaliser ou standardiser les variables concernées car ces techniques sont sensibles aux valeurs extrêmes. Nous devrons en revanche tester s’il est pertinent de les mettre à l’échelle par la technique de Robust Scaling. Les variables concernées sont : age, balance, duration, campaign, pdays, previous.
+Notre jeu de données ne comporte plus de valeurs manquantes mais contient encore des données quantitatives extrêmes. Nous avons décidé de les conserver car ces informations restent intéressantes pour notre modèle. Nous ne pouvons pas normaliser ou standardiser les variables concernées car ces techniques sont sensibles aux valeurs extrêmes. Nous devrons en revanche tester s’il est pertinent de les mettre à l’échelle par la technique de Robust Scaling. Les variables concernées sont : age, balance, duration, campaign, pdays, previous.
 
 Les variables catégorielles, quant à elles, devront être encodées de la manière suivante :
 * job : OneHotEncoding
@@ -41,10 +41,10 @@ Les modèles que nous avons testé sont les suivants :
 * Régression logistique (LogiticRegression)
 * Machines à Vecteurs de Support (SVC)
 * Méthode des K plus proches voisins (KNN - KNeighborsClassifier)
-* Arbres de décision (DecisionTreeClassifier et DecisionTreeRegressor)
+* Arbres de décision (DecisionTreeClassifier)
 * Forêts aléatoires (RandomForestClassifier)
-* Extreme Gradient Boosting (XGBClassifier)
 * Gradient Boosting (GradientBoostingClassifier)
+* Extreme Gradient Boosting (XGBClassifier)
 * CatBoosting (CatBoostClassifier)
 
 **Tests réalisés**
@@ -58,9 +58,9 @@ Nous avons testé nos modèles avec différents paramètres :
 **Optimisation des hyperparamètres**
 
 Pour optimiser les hyperparamètres, nous avons fait appel à différentes méthodes :
-* GridSearch: Explore toutes les combinaisons possibles d'hyperparamètres spécifiés pour trouver les meilleurs réglages du modèle.
-* RandomizedSearch: Échantillonne aléatoirement un nombre fixe de combinaisons d'hyperparamètres pour rechercher les meilleurs réglages de manière plus rapide.
-* BayesSearch: Utilise l'optimisation bayésienne pour sélectionner les combinaisons d'hyperparamètres les plus prometteuses en s'appuyant sur les performances des recherches précédentes.
+* GridSearch : Explore toutes les combinaisons possibles d'hyperparamètres spécifiés pour trouver les meilleurs réglages du modèle.
+* RandomizedSearch : Échantillonne aléatoirement un nombre fixe de combinaisons d'hyperparamètres pour rechercher les meilleurs réglages de manière plus rapide.
+* BayesSearch : Utilise l'optimisation bayésienne pour sélectionner les combinaisons d'hyperparamètres les plus prometteuses en s'appuyant sur les performances des recherches précédentes.
 
 
 #### Interprétation des résultats
