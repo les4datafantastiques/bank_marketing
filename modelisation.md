@@ -4,17 +4,25 @@ Comme nous l’avons vu précédemment, la variable la plus importante de notre 
 
 Nous devons donc mettre en place un modèle d’apprentissage supervisé suivant la technique de la classification (prédiction d’une variable cible de type qualitatif).
 
+Nous avons choisi de nettoyer le dataset avant la modélisation car il y avait peu de données à retraiter et que ces retraitement auront peu d'impact sur la suite de notre projet :
+* suppression d'une colonne (contact),
+* suppression de seulement 70 lignes pour valeur job manquante,
+* et remplacement des 427 valeurs manquantes restantes d'education (70 des valeurs manquantes ayant été supprimées avec la suppression des lignes dont job était manquant).
+
 Le dataset ne présentant pas un grand volume, nous ne réduirons pas sa dimension lors de la modélisation.
 
-Nous diviserons les données en deux parties : 75% du dataset seront dédiés à l’entraînement et 25% du dataset seront dédiés à l’évaluation de notre modèle.
+Nous diviserons les données en deux parties : étant donné que nous disposons d'un dataset d'un volume correct (plus de 10 000 entrées), 70% du dataset seront dédiés à l’entraînement et 30% du dataset seront dédiés à l’évaluation de notre modèle.
 
-**Choix des métriques de performance**
+**Choix de la métrique de performance**
 
-Les métriques de performance principales utilisées pour comparer nos modèles sont les suivantes :
-* **Accuracy :** L'accuracy est la métrique la plus connue pour évaluer un modèle de classification. Elle correspond simplement au taux de prédictions correctes effectuées par le modèle. Pour rappel, c'est la métrique qui est utilisée par défaut lorsque l'on utilise la méthode score.
-* **Précision :** La précision est une métrique qui répond à la question : Parmi toutes les prédictions positives du modèle, combien sont de vrais positifs ? Un score de précision élevé nous informe que le modèle ne classe pas aveuglément toutes les observations comme positives.
-* **Rappel (recall en anglais) :** Le rappel est une métrique qui quantifie la proportion d'observations réellement positives qui ont été correctement classifiées positives par le modèle. Un score de rappel élevé nous informe que le modèle est capable de bien détecter les observations réellement positives.
-* **Le score F1, ou F1-score en anglais :** Le f1-score est une métrique qui permet de combiner la précision et le rappel, puisqu'elle correspond à leur moyenne harmonique. Le f1-score est une des métriques à privilégier lorsqu'il y a un déséquilibre de classes. En regardant uniquement l'accuracy, les résultats pourraient être faussés.
+Selon la classification de notre projet (modèle supervisé de classification), nous pouvons retenir 4 principales métriques de performance : l’exactitude, la précision, le rappel et le score F1.
+
+* **L'exactitude (accuracy en anglais)** évalue le taux de bonnes prédictions par rapport au nombre total de prédictions. Elle est facile à calculer, facile à interpréter, et résume la performance du modèle avec une valeur unique. Elle évalue mal les performances d’un modèle basé sur des données déséquilibrées, mais ce n'est pas le cas dans notre projet. Cependant, l’exactitude ne permet pas de faire des nuances entre les différentes prédictions et néglige de ce fait le coût des faux négatifs. Notre choix se portera donc sur une métrique plus précise.
+* **La précision** est une métrique qui répond à la question : Parmi toutes les prédictions positives du modèle, combien sont de vrais positifs ? Un score de précision élevé nous informe que le modèle ne classe pas aveuglément toutes les observations comme positives. Cette métrique est utile lorsque le coût des faux positifs est élevé.
+* **Le rappel (recall en anglais)** est une métrique qui quantifie la proportion d'observations réellement positives qui ont été correctement classifiées positives par le modèle (vrai positifs par rapport à la somme des vrais positifs et faux négatifs). Un score de rappel élevé nous informe que le modèle est capable de bien détecter les observations réellement positives. Cette métrique est utile lorsque le coût des faux négatifs est élevé.
+* **Le score F1 (F1-score en anglais)** est une métrique qui permet de combiner la précision et le rappel, puisqu'elle correspond à leur moyenne harmonique.
+
+C'est dernière métrique, **le score F1**, qui nous parait la plus adaptée pour évaluer nos différents modèles de Machine Learning.
 
 
 #### Choix du modèle et optimisation

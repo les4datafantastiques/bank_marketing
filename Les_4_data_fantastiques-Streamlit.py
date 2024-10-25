@@ -548,57 +548,15 @@ models = {
         }
 
 # Définition des hyperparamètres pour chaque modèle
-#param_grid = {
-#            'Logistic Regression': {
-#                            'C': [0.01, 0.1, 1, 10, 100],
-#                            'solver': ['liblinear', 'lbfgs'],
-#                            'max_iter': [100, 200, 1000]
-#                            },
-#            'Decision Tree Classifier': {
-#                            'max_depth': [None, 5, 10, 20],
-#                            'min_samples_split': [2, 5, 10]
-#                            },
-#            'Decision Tree Regressor': {},
-#            'Random Forest': {
-#                            'n_estimators': [50, 100, 200],
-#                            'max_depth': [None, 5, 10, 20],
-#                            'min_samples_split': [2, 5, 10]
-#                            },
-#            'Gradient Boost': {
-#                            'n_estimators': [50, 100, 200],
-#                            'learning_rate': [0.01, 0.1, 0.2],
-#                            'max_depth': [3, 5, 7]
-#                            },
-#            'SVM': {
-#                            'C': [0.01, 0.1, 1, 10, 100],
-#                            'kernel': ['linear', 'rbf']
-#                            },
-#            'KNN': {
-#                            'n_neighbors': [3, 5, 7, 10],
-#                            'weights': ['uniform', 'distance']
-#                            },
-#            'Extreme Gradient Boost': {
-#                            'n_estimators': [100, 200, 300],
-#                            'learning_rate': [0.01, 0.1, 0.2],
-#                            'max_depth': [3, 5, 7]
-#                            },
-#            'CatBoost': {
-#                            'iterations': [100, 200, 300],
-#                            'learning_rate': [0.01, 0.1, 0.2],
-#                            'depth': [6, 8, 10]
-#                            }
-#            }
-
-# Pour faire tourner les modèles avec les hyperparamètres définis dans un module à part en dur : 
 param_grid = {
             'Logistic Regression': {
-                            "C":[0.1],
-                            "max_iter":[100],
-                            "solver":["lbfgs"]
+                            'C': [0.01, 0.1, 1, 10, 100],
+                            'solver': ['liblinear', 'lbfgs'],
+                            'max_iter': [100, 200, 1000]
                             },
             'Decision Tree Classifier': {
-                            "max_depth":[5],
-                            "min_samples_split":[2]
+                            'max_depth': [None, 5, 10, 20],
+                            'min_samples_split': [2, 5, 10]
                             },
 #            'Decision Tree Regressor': {},
 #            'Random Forest': {
@@ -616,13 +574,13 @@ param_grid = {
 #                            'kernel': ['linear', 'rbf']
 #                            },
             'KNN': {
-                            "n_neighbors":[10],
-                            "weights":["uniform"]
+                            'n_neighbors': [3, 5, 7, 10],
+                            'weights': ['uniform', 'distance']
                             },
             'Extreme Gradient Boost': {
-                            "learning_rate":[0.2],
-                            "max_depth":[3],
-                            "n_estimators":[100]
+                            'n_estimators': [100, 200, 300],
+                            'learning_rate': [0.01, 0.1, 0.2],
+                            'max_depth': [3, 5, 7]
                             },
 #            'CatBoost': {
 #                            'iterations': [100, 200, 300],
@@ -630,6 +588,121 @@ param_grid = {
 #                            'depth': [6, 8, 10]
 #                            }
             }
+
+
+#Version plus complète des hyperparamètres :
+#param_grid = {
+#            'Logistic Regression': {
+#                            'C': [0.001, 0.01, 0.1, 1, 10, 100],
+#                            'solver': ['liblinear', 'lbfgs', 'saga'],
+#                            'penalty': ['l2', 'l1'],
+#                            'max_iter': [100, 200, 1000]
+#                            },
+#    
+#            'Decision Tree Classifier': {
+#                            'max_depth': [None, 5, 10, 20, 30], 
+#                            'min_samples_split': [2, 5, 10, 20],
+#                            'min_samples_leaf': [1, 2, 4],
+#                            'criterion': ['gini', 'entropy']
+#                            },
+#    
+#            'Decision Tree Regressor': {
+#                            'max_depth': [None, 5, 10, 20, 30],
+#                            'min_samples_split': [2, 5, 10, 20],
+#                            'min_samples_leaf': [1, 2, 4],
+#                            'criterion': ['mse', 'friedman_mse']
+#                            },
+#    
+#            'Random Forest': {
+#                            'n_estimators': [100, 200, 500],
+#                            'max_depth': [None, 10, 20, 30],
+#                            'min_samples_split': [2, 5, 10],
+#                            'min_samples_leaf': [1, 2, 4],
+#                            'bootstrap': [True, False]
+#                            },
+#    
+#            'Gradient Boost': {
+#                            'n_estimators': [100, 200, 500],
+#                            'learning_rate': [0.001, 0.01, 0.1, 0.2],
+#                            'max_depth': [3, 5, 7, 10],
+#                            'subsample': [0.8, 1.0],
+#                            'min_samples_split': [2, 5, 10]
+#                            },
+#    
+#            'SVM': {
+#                            'C': [0.01, 0.1, 1, 10, 100, 1000],
+#                            'kernel': ['linear', 'rbf', 'poly'],
+#                            'gamma': ['scale', 'auto'],
+#                            'degree': [2, 3, 4],
+#                            'class_weight': ['balanced', None]
+#                            },
+#    
+#            'KNN': {
+#                            'n_neighbors': [3, 5, 7, 9, 11],
+#                            'weights': ['uniform', 'distance'],
+#                            'metric': ['euclidean', 'manhattan', 'minkowski']
+#                            },
+#    
+#            'Extreme Gradient Boost': {
+#                            'n_estimators': [100, 200, 500],
+#                            'learning_rate': [0.01, 0.1, 0.2, 0.3],
+#                            'max_depth': [3, 5, 7, 10],
+#                            'colsample_bytree': [0.8, 1.0],
+#                            'subsample': [0.8, 1.0],
+#                            'gamma': [0, 0.1, 0.2]
+#                            },
+#    
+#            'CatBoost': {
+#                            'iterations': [100, 200, 500],
+#                            'learning_rate': [0.01, 0.1, 0.2],
+#                            'depth': [4, 6, 8, 10],
+#                            'l2_leaf_reg': [1, 3, 5],
+#                            'border_count': [32, 64, 128]
+#                        }
+#            }
+
+
+# Pour faire tourner les modèles avec les hyperparamètres définis dans un module à part en dur : 
+#param_grid = {
+#            'Logistic Regression': {
+#                            "C":[0.1],
+#                            "max_iter":[100],
+#                            "solver":["lbfgs"]
+#                            },
+#            'Decision Tree Classifier': {
+#                            "max_depth":[5],
+#                            "min_samples_split":[2]
+#                            },
+#            'Decision Tree Regressor': {},
+#            'Random Forest': {
+#                            'n_estimators': [50, 100, 200],
+#                            'max_depth': [None, 5, 10, 20],
+#                            'min_samples_split': [2, 5, 10]
+#                            },
+#            'Gradient Boost': {
+#                            'n_estimators': [50, 100, 200],
+#                            'learning_rate': [0.01, 0.1, 0.2],
+#                            'max_depth': [3, 5, 7]
+#                            },
+#            'SVM': {
+#                            'C': [0.01, 0.1, 1, 10, 100],
+#                            'kernel': ['linear', 'rbf']
+#                            },
+#            'KNN': {
+#                            "n_neighbors":[10],
+#                            "weights":["uniform"]
+#                            },
+#            'Extreme Gradient Boost': {
+#                            "learning_rate":[0.2],
+#                            "max_depth":[3],
+#                            "n_estimators":[100]
+#                            },
+#            'CatBoost': {
+#                            'iterations': [100, 200, 300],
+#                            'learning_rate': [0.01, 0.1, 0.2],
+#                            'depth': [6, 8, 10]
+#                            }
+#            }
 
 
 if page == modelisation:
@@ -654,7 +727,7 @@ if page == ml:
         var_num = ["age","balance","campaign","pdays","previous"]
     data = df.drop("deposit", axis = 1)
     target = df["deposit"]
-    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.25, random_state = 88)
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.30, random_state = 88)
     if traitement_var_num == "Avec RobustScaling":
         if traitement_education == "Ordinal Encoding":
             var_cat_for_ohe = ["job","marital","default","housing","loan","day","month","poutcome"]
