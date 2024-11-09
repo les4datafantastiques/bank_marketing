@@ -147,6 +147,12 @@ if page == donnees:
 var_num = ["age","balance","duration","campaign","pdays","previous"]
 var_cat = ["job","marital","education","default","housing","loan","contact","day","month","poutcome","deposit"]
 
+jobs_education = {}
+for element in df_bank["job"].unique():
+    selection_job = df_bank.loc[df_bank["job"]== element]
+    valeurs_job = selection_job["education"].value_counts()
+    mode_job = selection_job["education"].mode()[0]
+    jobs_education[element] = mode_job
 
 if page == visu:
     st.header(visu)
@@ -386,6 +392,8 @@ if page == visu:
             st.write("Les variables job et educations semblent corrélées entre elles. Pour chaque job, une donnée education semble ressortir clairement de manière générale.")
             st.write("Le résultat est plus mitigé pour les retraités et entrepreneurs, mais le nombre de clients issus de ces catégories semble suffisamment faible pour pouvoir en faire abstraction.")
             st.write("Nous pouvons donc en conclure que la variable education, lorsqu’elle est manquante dans le dataset, peut être déduite de la variable job.")
+            st.write("Modalités les plus fréquentes de education par job :")
+            st.write(jobs_education)
         if choix_var_cat == "marital":
             st.write("Les clients mariés semblent moins enclins à souscrire un dépôt à terme suite à une campagne marketing. Les célibataires seront de meilleures cibles.")
         if choix_var_cat == "default":
@@ -468,13 +476,6 @@ if page == visu:
             st.write("La variable deposit est notre variable cible. Sa distribution est très équilibrée, et elle ne comprend aucune valeur manquante. Elle ne nécessite donc aucun retraitement.")
 
 
-
-jobs_education = {}
-for element in df_bank["job"].unique():
-    selection_job = df_bank.loc[df_bank["job"]== element]
-    valeurs_job = selection_job["education"].value_counts()
-    mode_job = selection_job["education"].mode()[0]
-    jobs_education[element] = mode_job
 
 # RETRAITEMENTS POUR GENERER df_bank_0 (Base utilisée uniquement pour le profiling)
 
