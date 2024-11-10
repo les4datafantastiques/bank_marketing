@@ -27,9 +27,22 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier, Pool
 
+from pathlib import Path
+
+project_root = Path('.')
+data_path = project_root / 'data'
+build_path = project_root / 'build'
+pages_path = project_root / 'pages'
+projet_path = pages_path / '1-projet'
+donnees_path = pages_path / '2-donnees'
+visu_path = pages_path / '3-visu'
+modelisation_path = pages_path / '4-modelisation'
+ml_path = pages_path / '5-ml'
+conclusion_path = pages_path / '6-conclusion'
+
 
 # Création d'un dataframe pour lire le data set
-df_bank = pd.read_csv("bank.csv", sep = ",")
+df_bank = pd.read_csv(data_path / "bank.csv", sep = ",")
 
 st.title("Bank Marketing")
 st.sidebar.title("Sommaire")
@@ -37,73 +50,19 @@ projet, donnees, visu, modelisation, ml, conclusion = ("Le projet","Le jeu de do
 pages=[projet, donnees, visu, modelisation, ml, conclusion]
 page=st.sidebar.radio("Aller vers :", pages)    
 
+
 # Exploitation d'un fichier .md pour la page de présentation du projet
-f = open('contexte_et_objectifs.md')
-txt_projet = f.read()
+txt_projet = open(projet_path / 'contexte_et_objectifs.md').read()
 
-# Zones de texte de la page de présentation du jeu de données
-txt_cadre = """
-#### Cadre
+# Fichiers exploités sur la page de présentation du jeu de données
+txt_cadre = open(donnees_path / 'cadre.md').read()
+txt_pertinence = open(donnees_path / 'pertinence.md').read()
+df_pertinence = pd.read_csv(donnees_path / "tableau_variables.csv", sep = ";", index_col=0, lineterminator="\n")
+txt_conclusion_prepocess = open(donnees_path / 'conclusion_preprocess.md').read()
 
-Le jeu de données dont nous disposons est accessible librement sur la plateforme Kaggle : https://www.kaggle.com/datasets/janiobachmann/bank-marketing-dataset/data
-
-Ces données sont sous License CC0: Public Domain
-    
-La volumétrie du jeu de données est de 17 colonnes pour 11 162 lignes.
-    
-Les données sont de différentes natures (7 entiers, 6 chaînes de caractères, 4 binaires), et se décomposent en 6 variables quantitatives (age, balance, duration, campaign, pdays, previous) et 11 variables catégorielles (job, marital, education, default, housing, loan, contact, day, month, poutcome, deposit).
-"""
-
-txt_pertinence = """
-#### Pertinence
-
-La variable la plus importante est la variable binaire « deposit » qui indique si le prospect a finalement souscrit ou non un dépôt à terme suite à la campagne marketing.
-
-Nous devons donc mettre en place un modèle d’apprentissage supervisé suivant la technique de la classification (prédiction d’une variable cible de type qualitatif).
-
-Il nous appartiendra de déterminer la corrélation entre cette variable « deposit » et les autres variables du dataset, pour pouvoir la prédire au final.
-"""
-
-txt_preprocess = """
-#### Pre-processing et feature engineering
-"""
-
-df_pertinence = pd.read_csv("tableau_variables.csv", sep = ";", index_col=0, lineterminator="\n")
-
-
-txt_conclusion_prepocess = """
-#### Conclusions sur les variables du dataset
-
-Nous disposons d’ores et déjà de certaines informations nous permettant de cibler nos futurs prospects. Il semblerait que notre prospect idéal soit :
-* âgé de moins de 29 ans ou plus de 60 ans, 
-* célibataire, 
-* étudiant ou retraité 
-* issu un cursus d’études du domaine tertiaire
-* ayant quelques économies personnelles
-* n’ayant aucun crédit en cours
-* ayant déjà été contacté lors d’une campagne précédente mais ayant eu lieu il y a moins de 200 jours
-* ayant souscrit un produit lors de la campagne précédente.
-
-Nos analyses macro font également ressortir quelques recommandations métier. Les méthodes d’approche à privilégier sont les suivantes :
-* contact par appel téléphonique sur une ligne mobile
-* avant le 5 du mois ou alors le 10 ou le 30 du mois
-* en mars, avril, septembre, octobre ou décembre
-* un seul appel par prospect
-
-Pour affiner nos analyses et réussir à prédire si un prospect serait susceptible de souscrire ou non à un dépôt à terme, nous devons passer à l’étape de la modélisation. Néanmoins, avant cela, nous devons procéder aux retraitements suivants :
-* age : créer des catégories pour faciliter le traitement
-* job : 1% de valeurs "unknown"(soit 70 lignes), nous avons pris la décision de supprimer ces lignes qui sont peu nombreuses
-* education : 4% de valeurs "unknown" (soit 497 lignes), cette variable est importante et ces lignes sont trop nombreuses pour être supprimées. Nous avons donc décidé de compléter les valeurs manquantes. La variable education étant fortement corrélée avec la variable job, nous déduirons les données manquantes du job associé (modalité education la plus fréquente pour le job en question)
-* contact : 21% de valeurs "unknown". Après analyse nous avons décidé de supprimer cette colonne qui ne représente pas d'intérêt majeur pour la modélisation.
-
-Pour rappel : la variable poutcome restera inchangée.
-En effet, cette variable comporte trop de valeurs manquantes pour pouvoir supprimer des lignes (75% de valeurs "unknown"). 
-De plus, nous avons acté qu'elle était importante pour notre modélisation. 
-La valeur "unknown" de cette variable constituera donc une valeur à part entière dans notre projet.
-"""
-
-
-
+# Fichiers exploités pour la page de modélisation du projet
+txt_classif_choix = open(modelisation_path / 'classification_choix.md').read()
+txt_interpretation = open(modelisation_path / 'interpretation.md').read()
 
 
 if page == projet:
@@ -124,7 +83,7 @@ if page == donnees:
         st.text(s)
         st.markdown("Les types de variables associés à chaque colonne sont en accord avec ce que représentent ces colonnes.")
     st.markdown(txt_pertinence)
-    st.markdown(txt_preprocess)
+    st.markdown("#### Pre-processing et feature engineering")
     st.write("**Nombre de valeurs en doublon dans le dataframe :**", df_bank.duplicated().sum())
 #   st.write("**Nombre de valeurs manquantes par colonne :**", df_bank.isna().sum())
     st.markdown("**Valeurs prises par les différentes variables catégorielles :**")
@@ -708,8 +667,8 @@ param_grid = {
 
 if page == modelisation:
     st.header(modelisation)
-    st.markdown(txt_modelisation)
-
+    st.markdown(txt_classif_choix)
+    st.markdown(txt_interpretation)
 
 
 if page == ml:

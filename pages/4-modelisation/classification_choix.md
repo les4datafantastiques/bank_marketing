@@ -29,16 +29,16 @@ C'est dernière métrique, **le score F1**, qui nous parait la plus adaptée pou
 
 **Choix de l'encodage**
 
-Notre jeu de données ne comporte plus de valeurs manquantes mais contient encore des données quantitatives extrêmes. Nous avons décidé de les conserver car ces informations restent intéressantes pour notre modèle. Nous ne pouvons pas normaliser ou standardiser les variables concernées car ces techniques sont sensibles aux valeurs extrêmes. Nous devrons en revanche tester s’il est pertinent de les mettre à l’échelle par la technique de Robust Scaling. Les variables concernées sont : age, balance, duration, campaign, pdays, previous.
+Notre jeu de données ne comporte plus de valeurs manquantes mais contient encore des données quantitatives extrêmes. Nous avons décidé de les conserver car ces informations restent intéressantes pour notre modèle. Nous ne pouvons pas normaliser ou standardiser les variables concernées car ces techniques sont sensibles aux valeurs extrêmes. Nous devrons en revanche tester s’il est pertinent de les mettre à l’échelle par la technique de Robust Scaling. Les variables concernées sont : age, balance, duration, campaign, pdays, previous.
 
-Les variables catégorielles, quant à elles, devront être encodées de la manière suivante :
+Les variables catégorielles, quant à elles, devront être encodées de la manière suivante :
 * job : OneHotEncoding
 * marital : OneHotEncoding
 * education : Ordinal Encoding ou OneHotEncoding
 * default : OneHotEncoding
 * housing : OneHotEncoding
 * loan : OneHotEncoding
-* day : OneHotEncoding
+* day : OneHotEncoding
 * month : OneHotEncoding
 * poutcome : OneHotEncoding
 * deposit : LabelEncoding
@@ -63,19 +63,14 @@ Nous avons testé nos modèles avec différents paramètres :
 * avec Ordinal Encoding / OneHotEncoding pour la variable education
 * avec / sans optimisation des hyperparamètres
 
+**Interprétabilité des modèles**
+
+Nous avons tenté de faire ressortir les variables les plus importantes utilisées par nos différents modèles pour décider du sort de la variable duration. Cependant, nous avons été confrontés à une limite : seuls quelques uns de nos modèles disposent de l'attribut feature_importances_ ou coef_.
+
+De ce fait, nous avons finalement décidé d'étudier leur interprétabilité avec SHAP (SHapley Additive exPlanations).
+
 **Optimisation des hyperparamètres**
 
 Pour optimiser les hyperparamètres, nous avons fait appel à la méthode GridSearch : celle-ci explore toutes les combinaisons possibles d'hyperparamètres spécifiés pour trouver les meilleurs réglages du modèle.
 
-Nous avons testé l'optimisation des hyperparamètres sur la quasi-totalité des modèles sélectionnés. Ces tests ont été réalisés en local car ils sont relativement lourds selon les modèles. Pour éviter de surcharger la plateforme Streamlit et ainsi perdre en efficacité, nous ne présenterons l'optimisation des paramètres que pour les 3 modèles qui nous semblent être les plus performants, à savoir : ..., ... et ... .
-
-
-#### Interprétation des résultats
-
-Lors de l’exploration des données, nous nous posions la question de la conservation ou non de la variable « duration ».
-Nous n'avons pas pu faire resortir les variables les plus importantes pour tous nos modèles car certains ne possèdent pas d'attribut feature_importances_ ou coef_. Néanmoins, la variable duration semble être dans le top 5 des variables les plus importantes pour au moins 4 de nos modèles. Nous pourrions donc en déduire qu'elle joue un rôle prépondérant dans notre projet de prédiction et que nous ne pouvons donc pas la supprimer de notre base. Néanmoins, nous avons décidé d'interpréter ce résultat différemment : cette variable n'étant pas connue a priori, la place qu'elle semble prendre dans la prédiction est trop importante. Nous prenons donc le parti de la supprimer pour notre modèle de prédiction.
-
-La mise à l'échelle par RobustScaling agit positivement sur les modèles suivants : Logistic Regression, SVM, KNN, Decision Tree Classifier, Decision Tree Regressor et Random Forest.
-Elle est cependant sans incidence pour les modèles Gradient Boost, Extreme Gradient Boost et CatBoost.
-
-Le fait d’encoder la variable education en Ordinal Encoding ou OneHotEncoding semble peu importer. Les résultats sont équivalents avec les 2 méthodes.
+Nous avons testé l'optimisation des hyperparamètres sur la quasi-totalité des modèles sélectionnés. Ces tests ont été réalisés en local car ils sont relativement lourds selon les modèles. Pour éviter de surcharger la plateforme Streamlit et ainsi perdre en efficacité, nous ne présenterons l'optimisation des paramètres que pour les 3 modèles qui nous semblent être les plus performants, à savoir : CatBoosting, Extreme Gradient Boosting et Forêts aléatoires.
