@@ -476,11 +476,6 @@ df_bank_2 = df_bank_1.drop("duration", axis=1)
 df_bank_2.to_csv('bank_2.csv', index=False, sep=',')
 
 
-# Exploitation d'un fichier .md pour la rubrique classification de la page de modélisation du projet
-f = open('modelisation.md')
-txt_modelisation = f.read()
-
-
 # df = df_bank_1
 
 # data = df.drop("deposit", axis = 1)
