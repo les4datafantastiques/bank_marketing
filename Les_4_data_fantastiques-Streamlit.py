@@ -496,19 +496,13 @@ df_bank_2 = df_bank_1.drop("duration", axis=1)
 df_bank_2.to_csv('bank_2.csv', index=False, sep=',')
 
 
-# df = df_bank_1
 
-# data = df.drop("deposit", axis = 1)
-# target = df["deposit"]
-
-# X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.25, random_state = 88)
+# Mise en place du tronc commun à tous nos tests de machine learning
 
 le = LabelEncoder()
 ohe = OneHotEncoder(drop = "first")
 oe = OrdinalEncoder(categories = [["primary", "secondary", "tertiary"]])
 num_scaler = RobustScaler()
-
-# prepro = ColumnTransformer(transformers = [("numerical", num_scaler, var_num), ("categorical_ohe", ohe, var_cat_for_ohe), ("categorical_oe", oe, ["education"])])
 
 models = {
         "Logistic Regression": LogisticRegression(max_iter = 1000),
@@ -535,7 +529,6 @@ if page == ml:
     traitement_duration = st.radio("Choisissez le traitement à appliquer à la colonne duration :", ("Supprimer la colonne duration", "Conserver la colonne duration"))
     traitement_var_num = st.radio("Choisissez le traitement des variables numériques :", ("Avec RobustScaling", "Sans RobustScaling"))
     traitement_education = st.radio("Choisissez le traitement de la variable education :", ("Ordinal Encoding", "OneHotEncoding"))
-#    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres ?", ("Non", "Oui"))
     st.write("Pour des raisons d'optimisation des performances de la plateforme, nous ne ferons tourner GridSearch que sur les 3 modèles qui nous semblent être les plus performants, à savoir : CatBoosting, Extreme Gradient Boosting et Forêts aléatoires.")
     optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres pour les 3 modèles les plus performants ?", ("Oui", "Non"))
     if traitement_duration == "Conserver la colonne duration":
@@ -633,37 +626,17 @@ if page == ml:
             with open(params_file, "rb") as f:
                 best_params = pickle.load(f)
             best_params_list[model_name] = best_params  # Sauvegarder les meilleurs paramètres
-#       pipeline = Pipeline(steps=[("preprocessing", prepro), ('model', model)])
-#       if optimisation_hyperparam == "Oui":
-#           if model_name in param_grid:  # Si des paramètres sont spécifiés pour ce modèle
-#                grid_search = GridSearchCV(estimator=model, param_grid = param_grid[model_name], scoring='f1', cv=5)
-#                grid_search.fit(X_train_prepro, y_train)
-#                model = grid_search.best_estimator_  # Utiliser les meilleurs paramètres pour le modèle
-##                grid_search = GridSearchCV(pipeline, param_grid = param_grid[model_name], scoring='accuracy', cv=5)
-##                grid_search.fit(X_train, y_train)
-#                best_params_list[model_name] = grid_search.best_params_  # Sauvegarder les meilleurs paramètres
-#                y_pred_train = grid_search.predict(X_train_prepro)
-#                y_pred_test = grid_search.predict(X_test_prepro)
-#               st.write("Hyperparamètres testés pour le modèle ", model_name)
-#               st.write(f"{model_name}: {params}")
             st.write("Meilleurs hyperparamètres pour le modèle ", model_name)
-#                st.write(grid_search.best_params_)
             st.write(best_params)
         else:
             st.write("Aucun hyperparamètre n'a été optimisé pour ce test.")
-#        else:
-#            model.fit(X_train_prepro, y_train)
         y_pred_train = model.predict(X_train_prepro)
         y_pred_test = model.predict(X_test_prepro)
-#        accuracy_train = accuracy_score(y_train, y_pred_train)
-#        accuracy_test = accuracy_score(y_test, y_pred_test)
         f1 = f1_score(y_test, y_pred_test)
         precision = precision_score(y_test, y_pred_test)
         recall = recall_score(y_test, y_pred_test)
         resultats.append({
             "Modèle": model_name,
-#            "Accuracy train": accuracy_train,
-#            "Accuracy test": accuracy_test,
             "Précision": precision,
             "Rappel": recall,
             "Score F1": f1
@@ -671,10 +644,6 @@ if page == ml:
         st.write("Variables les plus importantes du modèle ", model_name)
         nom_var = prepro.get_feature_names_out()
         if hasattr(model, "feature_importances_"):
-#           if model_name == "CatBoost":
-#               importance = model.get_feature_importance(Pool(X_train_prepro, y_train))
-#           else :
-#               importance = model.feature_importances_
             importance = model.feature_importances_
             data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Variables", ascending = False)
             top_data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Importance", ascending = False)
