@@ -65,7 +65,7 @@ Nous avons testé nos modèles avec différents paramètres :
 
 **Interprétabilité des modèles**
 
-Nous avons tenté de faire ressortir les variables les plus importantes utilisées par nos différents modèles pour décider du sort de la variable duration. Cependant, nous avons été confrontés à une limite : seuls quelques uns de nos modèles disposent de l'attribut feature_importances_ ou coef_.
+Nous avons tenté de faire ressortir les variables les plus importantes utilisées par nos différents modèles pour décider du sort de la variable duration. Cependant, nous avons été confrontés à une limite : seuls quelques-uns de nos modèles disposent de l'attribut feature_importances_ ou coef_.
 
 De ce fait, nous avons finalement décidé d'étudier leur interprétabilité avec SHAP (SHapley Additive exPlanations).
 
