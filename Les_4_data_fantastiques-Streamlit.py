@@ -18,6 +18,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.compose import ColumnTransformer
 #from sklearn.inspection import permutation_importance
 from sklearn.pipeline import Pipeline
+import pickle
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -32,6 +33,8 @@ from pathlib import Path
 project_root = Path('.')
 data_path = project_root / 'data'
 build_path = project_root / 'build'
+build_graphs_path = build_path / 'graphs'
+build_ml_path = build_path / 'ml'
 pages_path = project_root / 'pages'
 projet_path = pages_path / '1-projet'
 donnees_path = pages_path / '2-donnees'
@@ -49,6 +52,23 @@ st.sidebar.title("Sommaire")
 projet, donnees, visu, modelisation, ml, conclusion = ("Le projet","Le jeu de données","Quelques visualisations","Modélisation","Machine Learning","Conclusion")
 pages=[projet, donnees, visu, modelisation, ml, conclusion]
 page=st.sidebar.radio("Aller vers :", pages)    
+
+st.sidebar.markdown(
+    """
+    <div style="border: 2px dashed #ff4b4b; padding: 10px; border-radius: 5px; margin-top: 20px;">
+        <p style="color: #333; font-size: 14px; text-align: left; font-weight: bold; padding-left: 20px; margin: 0px;">
+            Projet réalisé par :
+        </p>
+        <ul style="color: #333; font-size: 14px; list-style-type: disc; padding-left: 20px; margin: 0px;">
+            <li>Arnaud Leleu</li>
+            <li>Camille Kienlen</li>
+            <li>Clément Guillet</li>
+            <li>Julien Musschoot</li>
+        </ul>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 
 # Exploitation d'un fichier .md pour la page de présentation du projet
@@ -499,165 +519,8 @@ models = {
         "Random Forest": RandomForestClassifier(),
         "Gradient Boost" : GradientBoostingClassifier(),
         "Extreme Gradient Boost" : XGBClassifier(),
-#        "CatBoost" : CatBoostClassifier(silent = True)  # 'silent=True' pour éviter les logs
+        "CatBoost" : CatBoostClassifier(silent = True)  # 'silent=True' pour éviter les logs
         }
-
-# Définition des hyperparamètres pour chaque modèle
-param_grid = {
-            'Logistic Regression': {
-                            'C': [0.01, 0.1, 1, 10, 100],
-                            'solver': ['liblinear', 'lbfgs'],
-                            'max_iter': [100, 200, 1000]
-                            },
-            'Decision Tree Classifier': {
-                            'max_depth': [None, 5, 10, 20],
-                            'min_samples_split': [2, 5, 10]
-                            },
-#            'Decision Tree Regressor': {},
-#            'Random Forest': {
-#                            'n_estimators': [50, 100, 200],
-#                            'max_depth': [None, 5, 10, 20],
-#                            'min_samples_split': [2, 5, 10]
-#                            },
-#            'Gradient Boost': {
-#                            'n_estimators': [50, 100, 200],
-#                            'learning_rate': [0.01, 0.1, 0.2],
-#                            'max_depth': [3, 5, 7]
-#                            },
-#            'SVM': {
-#                            'C': [0.01, 0.1, 1, 10, 100],
-#                            'kernel': ['linear', 'rbf']
-#                            },
-            'KNN': {
-                            'n_neighbors': [3, 5, 7, 10],
-                            'weights': ['uniform', 'distance']
-                            },
-            'Extreme Gradient Boost': {
-                            'n_estimators': [100, 200, 300],
-                            'learning_rate': [0.01, 0.1, 0.2],
-                            'max_depth': [3, 5, 7]
-                            },
-#            'CatBoost': {
-#                            'iterations': [100, 200, 300],
-#                            'learning_rate': [0.01, 0.1, 0.2],
-#                            'depth': [6, 8, 10]
-#                            }
-            }
-
-
-#Version plus complète des hyperparamètres :
-#param_grid = {
-#            'Logistic Regression': {
-#                            'C': [0.001, 0.01, 0.1, 1, 10, 100],
-#                            'solver': ['liblinear', 'lbfgs', 'saga'],
-#                            'penalty': ['l2', 'l1'],
-#                            'max_iter': [100, 200, 1000]
-#                            },
-#    
-#            'Decision Tree Classifier': {
-#                            'max_depth': [None, 5, 10, 20, 30], 
-#                            'min_samples_split': [2, 5, 10, 20],
-#                            'min_samples_leaf': [1, 2, 4],
-#                            'criterion': ['gini', 'entropy']
-#                            },
-#    
-#            'Decision Tree Regressor': {
-#                            'max_depth': [None, 5, 10, 20, 30],
-#                            'min_samples_split': [2, 5, 10, 20],
-#                            'min_samples_leaf': [1, 2, 4],
-#                            'criterion': ['mse', 'friedman_mse']
-#                            },
-#    
-#            'Random Forest': {
-#                            'n_estimators': [100, 200, 500],
-#                            'max_depth': [None, 10, 20, 30],
-#                            'min_samples_split': [2, 5, 10],
-#                            'min_samples_leaf': [1, 2, 4],
-#                            'bootstrap': [True, False]
-#                            },
-#    
-#            'Gradient Boost': {
-#                            'n_estimators': [100, 200, 500],
-#                            'learning_rate': [0.001, 0.01, 0.1, 0.2],
-#                            'max_depth': [3, 5, 7, 10],
-#                            'subsample': [0.8, 1.0],
-#                            'min_samples_split': [2, 5, 10]
-#                            },
-#    
-#            'SVM': {
-#                            'C': [0.01, 0.1, 1, 10, 100, 1000],
-#                            'kernel': ['linear', 'rbf', 'poly'],
-#                            'gamma': ['scale', 'auto'],
-#                            'degree': [2, 3, 4],
-#                            'class_weight': ['balanced', None]
-#                            },
-#    
-#            'KNN': {
-#                            'n_neighbors': [3, 5, 7, 9, 11],
-#                            'weights': ['uniform', 'distance'],
-#                            'metric': ['euclidean', 'manhattan', 'minkowski']
-#                            },
-#    
-#            'Extreme Gradient Boost': {
-#                            'n_estimators': [100, 200, 500],
-#                            'learning_rate': [0.01, 0.1, 0.2, 0.3],
-#                            'max_depth': [3, 5, 7, 10],
-#                            'colsample_bytree': [0.8, 1.0],
-#                            'subsample': [0.8, 1.0],
-#                            'gamma': [0, 0.1, 0.2]
-#                            },
-#    
-#            'CatBoost': {
-#                            'iterations': [100, 200, 500],
-#                            'learning_rate': [0.01, 0.1, 0.2],
-#                            'depth': [4, 6, 8, 10],
-#                            'l2_leaf_reg': [1, 3, 5],
-#                            'border_count': [32, 64, 128]
-#                        }
-#            }
-
-
-# Pour faire tourner les modèles avec les hyperparamètres définis dans un module à part en dur : 
-#param_grid = {
-#            'Logistic Regression': {
-#                            "C":[0.1],
-#                            "max_iter":[100],
-#                            "solver":["lbfgs"]
-#                            },
-#            'Decision Tree Classifier': {
-#                            "max_depth":[5],
-#                            "min_samples_split":[2]
-#                            },
-#            'Decision Tree Regressor': {},
-#            'Random Forest': {
-#                            'n_estimators': [50, 100, 200],
-#                            'max_depth': [None, 5, 10, 20],
-#                            'min_samples_split': [2, 5, 10]
-#                            },
-#            'Gradient Boost': {
-#                            'n_estimators': [50, 100, 200],
-#                            'learning_rate': [0.01, 0.1, 0.2],
-#                            'max_depth': [3, 5, 7]
-#                            },
-#            'SVM': {
-#                            'C': [0.01, 0.1, 1, 10, 100],
-#                            'kernel': ['linear', 'rbf']
-#                            },
-#            'KNN': {
-#                            "n_neighbors":[10],
-#                            "weights":["uniform"]
-#                            },
-#            'Extreme Gradient Boost': {
-#                            "learning_rate":[0.2],
-#                            "max_depth":[3],
-#                            "n_estimators":[100]
-#                            },
-#            'CatBoost': {
-#                            'iterations': [100, 200, 300],
-#                            'learning_rate': [0.01, 0.1, 0.2],
-#                            'depth': [6, 8, 10]
-#                            }
-#            }
 
 
 if page == modelisation:
@@ -666,13 +529,14 @@ if page == modelisation:
     st.markdown(txt_interpretation)
 
 
+
 if page == ml:
     st.header(ml)
     traitement_duration = st.radio("Choisissez le traitement à appliquer à la colonne duration :", ("Supprimer la colonne duration", "Conserver la colonne duration"))
     traitement_var_num = st.radio("Choisissez le traitement des variables numériques :", ("Avec RobustScaling", "Sans RobustScaling"))
     traitement_education = st.radio("Choisissez le traitement de la variable education :", ("Ordinal Encoding", "OneHotEncoding"))
 #    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres ?", ("Non", "Oui"))
-    st.write("Pour des raisons d'optimisation des performances de la plateforme, nous ne ferons tourner GridSearch que sur les 3 modèles qui nous semblent être les plus performants, à savoir : ..., ... et ... .")
+    st.write("Pour des raisons d'optimisation des performances de la plateforme, nous ne ferons tourner GridSearch que sur les 3 modèles qui nous semblent être les plus performants, à savoir : CatBoosting, Extreme Gradient Boosting et Forêts aléatoires.")
     optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres pour les 3 modèles les plus performants ?", ("Oui", "Non"))
     if traitement_duration == "Conserver la colonne duration":
         df = df_bank_1
@@ -704,61 +568,127 @@ if page == ml:
     resultats = []
     features = {}
     best_params_list = {}
+#    """
+#        Attribuer à num_test la valeur du test souhaité
+#        Catégorie de test et valeurs possibles de num_test :
+#            1 : avec la variable duration / sans Robust Scaling / Ordinal Encoding pour education / sans optimisation des hyperparamètres 
+#            2 : avec la variable duration / avec Robust Scaling / Ordinal Encoding pour education / sans optimisation des hyperparamètres
+#            3 : sans la variable duration / sans Robust Scaling / Ordinal Encoding pour education / sans optimisation des hyperparamètres
+#            4 : sans la variable duration / avec Robust Scaling / Ordinal Encoding pour education / sans optimisation des hyperparamètres
+#            5 : sans la variable duration / avec Robust Scaling / OneHotEncoding pour education / sans optimisation des hyperparamètres 
+#            6 : sans la variable duration / avec Robust Scaling / Ordinal Encoding pour education / avec optimisation des hyperparamètres 
+#            7 : avec la variable duration / sans Robust Scaling / OneHotEncoding pour education / sans optimisation des hyperparamètres 
+#            8 : avec la variable duration / avec Robust Scaling / OneHotEncoding pour education / sans optimisation des hyperparamètres
+#            9 : avec la variable duration / sans Robust Scaling / Ordinal Encoding pour education / avec optimisation des hyperparamètres 
+#            10 : avec la variable duration / avec Robust Scaling / Ordinal Encoding pour education / avec optimisation des hyperparamètres
+#            11 : avec la variable duration / sans Robust Scaling / OneHotEncoding pour education / avec optimisation des hyperparamètres 
+#            12 : sans la variable duration / avec Robust Scaling / OneHotEncoding pour education / avec optimisation des hyperparamètres
+#            13 : sans la variable duration / sans Robust Scaling / Ordinal Encoding pour education / avec optimisation des hyperparamètres
+#            14 : sans la variable duration / sans Robust Scaling / OneHotEncoding pour education / sans optimisation des hyperparamètres
+#            15 : sans la variable duration / sans Robust Scaling / OneHotEncoding pour education / avec optimisation des hyperparamètres
+#            16 : avec la variable duration / avec Robust Scaling / OneHotEncoding pour education / avec optimisation des hyperparamètres
+#    """
+    if traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Sans RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Non":
+        num_test = 1
+    elif traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Avec RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Non":
+        num_test = 2
+    elif traitement_duration == "Supprimer la colonne duration" and traitement_var_num == "Sans RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Non":
+        num_test = 3
+    elif traitement_duration == "Supprimer la colonne duration" and traitement_var_num == "Avec RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Non":
+        num_test = 4
+    elif traitement_duration == "Supprimer la colonne duration" and traitement_var_num == "Avec RobustScaling" and traitement_education == "OneHotEncoding" and optimisation_hyperparam == "Non":
+        num_test = 5
+    elif traitement_duration == "Supprimer la colonne duration" and traitement_var_num == "Avec RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Oui":
+        num_test = 6
+    elif traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Sans RobustScaling" and traitement_education == "OneHotEncoding" and optimisation_hyperparam == "Non":
+        num_test = 7
+    elif traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Avec RobustScaling" and traitement_education == "OneHotEncoding" and optimisation_hyperparam == "Non":
+        num_test = 8
+    elif traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Sans RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Oui":
+        num_test = 9
+    elif traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Avec RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Oui":
+        num_test = 10
+    elif traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Sans RobustScaling" and traitement_education == "OneHotEncoding" and optimisation_hyperparam == "Oui":
+        num_test = 11
+    elif traitement_duration == "Supprimer la colonne duration" and traitement_var_num == "Avec RobustScaling" and traitement_education == "OneHotEncoding" and optimisation_hyperparam == "Oui":
+        num_test = 12
+    elif traitement_duration == "Supprimer la colonne duration" and traitement_var_num == "Sans RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Oui":
+        num_test = 13
+    elif traitement_duration == "Supprimer la colonne duration" and traitement_var_num == "Sans RobustScaling" and traitement_education == "OneHotEncoding" and optimisation_hyperparam == "Non":
+        num_test = 14
+    elif traitement_duration == "Supprimer la colonne duration" and traitement_var_num == "Sans RobustScaling" and traitement_education == "OneHotEncoding" and optimisation_hyperparam == "Oui":
+        num_test = 15
+    elif traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Avec RobustScaling" and traitement_education == "OneHotEncoding" and optimisation_hyperparam == "Oui":
+        num_test = 16
+    else:
+        print("Test manquant !")
     for model_name, model in models.items():
+        test_path = build_ml_path / f"test{num_test}" 
+        model_file = test_path / f"ml_test{num_test}_{model_name}_model.pkl"
+        with open(model_file, "rb") as f:
+            model = pickle.load(f)
         st.write("#### Modèle testé : " + model_name)
-        pipeline = Pipeline(steps=[("preprocessing", prepro), ('model', model)])
-        if optimisation_hyperparam == "Oui":
-            if model_name in param_grid:  # Si des paramètres sont spécifiés pour ce modèle
-                grid_search = GridSearchCV(estimator=model, param_grid = param_grid[model_name], scoring='accuracy', cv=5)
-                grid_search.fit(X_train_prepro, y_train)
-                model = grid_search.best_estimator_  # Utiliser les meilleurs paramètres pour le modèle
-#                grid_search = GridSearchCV(pipeline, param_grid = param_grid[model_name], scoring='accuracy', cv=5)
-#                grid_search.fit(X_train, y_train)
-                best_params_list[model_name] = grid_search.best_params_  # Sauvegarder les meilleurs paramètres
-                y_pred_train = grid_search.predict(X_train_prepro)
-                y_pred_test = grid_search.predict(X_test_prepro)
+        if optimisation_hyperparam == "Oui" and model_name in ["Random Forest", "Extreme Gradient Boost", "CatBoost"]:
+            params_file = test_path / f"ml_test{num_test}_{model_name}_best_params.pkl"
+            with open(params_file, "rb") as f:
+                best_params = pickle.load(f)
+            best_params_list[model_name] = best_params  # Sauvegarder les meilleurs paramètres
+#       pipeline = Pipeline(steps=[("preprocessing", prepro), ('model', model)])
+#       if optimisation_hyperparam == "Oui":
+#           if model_name in param_grid:  # Si des paramètres sont spécifiés pour ce modèle
+#                grid_search = GridSearchCV(estimator=model, param_grid = param_grid[model_name], scoring='f1', cv=5)
+#                grid_search.fit(X_train_prepro, y_train)
+#                model = grid_search.best_estimator_  # Utiliser les meilleurs paramètres pour le modèle
+##                grid_search = GridSearchCV(pipeline, param_grid = param_grid[model_name], scoring='accuracy', cv=5)
+##                grid_search.fit(X_train, y_train)
+#                best_params_list[model_name] = grid_search.best_params_  # Sauvegarder les meilleurs paramètres
+#                y_pred_train = grid_search.predict(X_train_prepro)
+#                y_pred_test = grid_search.predict(X_test_prepro)
 #               st.write("Hyperparamètres testés pour le modèle ", model_name)
 #               st.write(f"{model_name}: {params}")
-                st.write("Meilleurs hyperparamètres pour le modèle ", model_name)
-                st.write(grid_search.best_params_)
-            else:
-                st.write("Aucun hyperparamètre n'a été optimisé pour ce test.")
+            st.write("Meilleurs hyperparamètres pour le modèle ", model_name)
+#                st.write(grid_search.best_params_)
+            st.write(best_params)
         else:
-            model.fit(X_train_prepro, y_train)
-            y_pred_train = model.predict(X_train_prepro)
-            y_pred_test = model.predict(X_test_prepro)
-        accuracy_train = accuracy_score(y_train, y_pred_train)
-        accuracy_test = accuracy_score(y_test, y_pred_test)
+            st.write("Aucun hyperparamètre n'a été optimisé pour ce test.")
+#        else:
+#            model.fit(X_train_prepro, y_train)
+        y_pred_train = model.predict(X_train_prepro)
+        y_pred_test = model.predict(X_test_prepro)
+#        accuracy_train = accuracy_score(y_train, y_pred_train)
+#        accuracy_test = accuracy_score(y_test, y_pred_test)
         f1 = f1_score(y_test, y_pred_test)
         precision = precision_score(y_test, y_pred_test)
         recall = recall_score(y_test, y_pred_test)
         resultats.append({
             "Modèle": model_name,
-            "Accuracy train": accuracy_train,
-            "Accuracy test": accuracy_test,
-            "Score F1": f1,
+#            "Accuracy train": accuracy_train,
+#            "Accuracy test": accuracy_test,
             "Précision": precision,
-            "Rappel": recall
+            "Rappel": recall,
+            "Score F1": f1
             })
         st.write("Variables les plus importantes du modèle ", model_name)
         nom_var = prepro.get_feature_names_out()
         if hasattr(model, "feature_importances_"):
-#            if model_name == "CatBoost":
-#                importance = model.get_feature_importance(Pool(X_train_prepro, y_train))
-#            else :
-#                importance = model.feature_importances_
+#           if model_name == "CatBoost":
+#               importance = model.get_feature_importance(Pool(X_train_prepro, y_train))
+#           else :
+#               importance = model.feature_importances_
             importance = model.feature_importances_
             data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Variables", ascending = False)
             top_data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Importance", ascending = False)
             st.dataframe(top_data_importances.head(5))
             fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", title="Top 5 des variables du modèle " + model_name)
             st.plotly_chart(fig)
+#            full_path = build_graphs_path / f"graph_var_imp_{model_name}.png"
+#            st.image(str(full_path), caption=f"Graphique des variables importantes pour le modèle {model_name}", use_column_width=True)
             for feature, importance in zip(nom_var, importance):
                 if feature not in features:
                     features[feature] = {}
                 features[feature][model_name] = importance
         elif model_name == "Logistic Regression":
-#            coef = model.coef_[0]
+#           coef = model.coef_[0]
             coef = model.coef_
             if coef.ndim == 1:  # Si c'est un tableau 1D (ce qui arrive parfois en classification binaire)
                 coef = coef.reshape(1, -1)
@@ -770,6 +700,8 @@ if page == ml:
             st.dataframe(top_data_importances.head(5))
             fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", title="Top 5 des variables du modèle " + model_name)
             st.plotly_chart(fig)
+#            full_path = build_graphs_path / f"graph_var_imp_{model_name}.png"
+#            st.image(str(full_path), caption=f"Graphique des variables importantes pour le modèle {model_name}", use_column_width=True)
             for feature, importance in zip(nom_var, data_importances["Importance"]):
                 if feature not in features:
                     features[feature] = {}
@@ -786,10 +718,10 @@ if page == ml:
     st.write("#### Récapitulatif des performances des différents modèles")
     st.write("**(selon les paramètres choisis précédemment)**")
     st.dataframe(recap_resultats)
-    st.write("#### Importances des variables pour chacun des modèles")
-    st.write("**(selon les paramètres choisis précédemment)**")
-    recap_importances = pd.DataFrame(features).T  # Transposition pour avoir les variables en ligne
-    st.table(recap_importances)
+    #st.write("#### Importances des variables pour chacun des modèles")
+    #st.write("**(selon les paramètres choisis précédemment)**")
+    #recap_importances = pd.DataFrame(features).T  # Transposition pour avoir les variables en ligne
+    #st.table(recap_importances)
 
 
 
