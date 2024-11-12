@@ -621,11 +621,11 @@ if page == ml:
         with open(model_file, "rb") as f:
             model = pickle.load(f)
         st.write("#### Modèle testé : " + model_name)
-        if optimisation_hyperparam == "Oui" and model_name in ["Random Forest", "Extreme Gradient Boost", "CatBoost"]:
+        if optimisation_hyperparam == "Oui" and (model_name in ["Random Forest", "Extreme Gradient Boost", "CatBoost"]):
             params_file = test_path / f"ml_test{num_test}_{model_name}_best_params.pkl"
             with open(params_file, "rb") as f:
                 best_params = pickle.load(f)
-            best_params_list[model_name] = best_params  # Sauvegarder les meilleurs paramètres
+            best_params_list[model_name] = best_params
             st.write("Meilleurs hyperparamètres pour le modèle ", model_name)
             st.write(best_params)
         else:
