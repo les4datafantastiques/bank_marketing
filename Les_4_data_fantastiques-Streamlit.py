@@ -33,6 +33,7 @@ from pathlib import Path
 project_root = Path('.')
 data_path = project_root / 'data'
 build_path = project_root / 'build'
+build_df_path = build_path / 'df'
 build_graphs_path = build_path / 'graphs'
 build_ml_path = build_path / 'ml'
 pages_path = project_root / 'pages'
@@ -473,7 +474,7 @@ def get_categ(age):
 	return categ
 df_bank_0["age_categ"] = df_bank_0["age"].apply(get_categ)
 # Export du dataframe df_bank_1 en fichier .csv
-df_bank_0.to_csv('bank_0_profiling.csv', index=False, sep=',')
+#df_bank_0.to_csv(build_df_path / 'bank_0_profiling.csv', index=False, sep=',')
 
 
 # RETRAITEMENTS POUR GENERER df_bank_1 (retraitements de base)
@@ -485,7 +486,7 @@ df_bank_1.loc[df_bank_1["education"] == "unknown", "education"] = df_bank_1.loc[
 # Suppression de la colonne "contact" :
 df_bank_1 = df_bank_1.drop("contact", axis=1)
 # Export du dataframe df_bank_1 en fichier .csv
-df_bank_1.to_csv('bank_1.csv', index=False, sep=',')
+#df_bank_1.to_csv(build_df_path / 'bank_1.csv', index=False, sep=',')
 
 
 # RETRAITEMENTS SUPPLEMENTAIRES POUR GENERER df_bank_2 (sans duration)
@@ -493,8 +494,7 @@ df_bank_1.to_csv('bank_1.csv', index=False, sep=',')
 # Suppression de la colonne "duration" :
 df_bank_2 = df_bank_1.drop("duration", axis=1)
 # Export du dataframe df_bank_2 en fichier .csv
-df_bank_2.to_csv('bank_2.csv', index=False, sep=',')
-
+#df_bank_2.to_csv(build_df_path / 'bank_2.csv', index=False, sep=',')
 
 
 # Mise en place du tronc commun à tous nos tests de machine learning
