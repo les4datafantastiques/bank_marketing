@@ -61,10 +61,10 @@ st.sidebar.markdown(
             Projet réalisé par :
         </p>
         <ul style="color: #333; font-size: 14px; list-style-type: disc; padding-left: 20px; margin: 0px;">
-            <li>Arnaud Leleu</li>
-            <li>Camille Kienlen</li>
-            <li>Clément Guillet</li>
-            <li>Julien Musschoot</li>
+	     <li><a href="https://www.linkedin.com/in/arnaud-leleu-1823a9b1/" target="_blank" style="text-decoration: none; color: #0d1b2a;">Arnaud Leleu </a><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" alt="LinkedIn" width="50" style="vertical-align: middle;"></li> 
+	     <li><a href="https://www.linkedin.com/in/camille-kienlen/" target="_blank" style="text-decoration: none; color: #1b263b;">Camille Kienlen </a><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" alt="LinkedIn" width="50" style="vertical-align: middle;"></li> 
+	     <li><a href="https://www.linkedin.com/in/cl%C3%A9ment-guillet-975a182b8/" target="_blank" style="text-decoration: none; color: #415a77;">Clément Guillet </a><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" alt="LinkedIn" width="50" style="vertical-align: middle;"></li> 
+	     <li><a href="https://www.linkedin.com/in/julien-musschoot-0b2b50171/" target="_blank" style="text-decoration: none; color: #778da9;">Julien Musschoot </a><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" alt="LinkedIn" width="50" style="vertical-align: middle;"></li> 
         </ul>
     </div>
     """,
