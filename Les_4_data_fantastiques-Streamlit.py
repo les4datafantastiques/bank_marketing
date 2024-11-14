@@ -54,18 +54,40 @@ projet, donnees, visu, modelisation, ml, conclusion = ("Le projet","Le jeu de do
 pages=[projet, donnees, visu, modelisation, ml, conclusion]
 page=st.sidebar.radio("Aller vers :", pages)    
 
+
+icone_LinkedIn = "https://upload.wikimedia.org/wikipedia/commons/8/81/LinkedIn_icon.svg"
+texte_icone_LinkedIn = "LinkedIn"
+taille_icone_LinkedIn = "16"
+format_icone_LinkedIn = "position: relative; top: -2px; margin-left: 5px;"
+
 st.sidebar.markdown(
-    """
+    f"""
     <div style="border: 2px dashed #ff4b4b; padding: 10px; border-radius: 5px; margin-top: 20px;">
-        <p style="color: #333; font-size: 14px; text-align: left; font-weight: bold; padding-left: 20px; margin: 0px;">
+        <p style="font-size: 14px; text-align: left; font-weight: bold; padding-left: 20px; margin: 0px;">
             Projet réalisé par :
         </p>
-        <ul style="color: #333; font-size: 14px; list-style-type: disc; padding-left: 20px; margin: 0px;">
-	     <li><a href="https://www.linkedin.com/in/arnaud-leleu-1823a9b1/" target="_blank" style="text-decoration: none; color: #0d1b2a;">Arnaud Leleu </a><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" alt="LinkedIn" width="50" style="vertical-align: middle;"></li> 
-	     <li><a href="https://www.linkedin.com/in/camille-kienlen/" target="_blank" style="text-decoration: none; color: #1b263b;">Camille Kienlen </a><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" alt="LinkedIn" width="50" style="vertical-align: middle;"></li> 
-	     <li><a href="https://www.linkedin.com/in/cl%C3%A9ment-guillet-975a182b8/" target="_blank" style="text-decoration: none; color: #415a77;">Clément Guillet </a><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" alt="LinkedIn" width="50" style="vertical-align: middle;"></li> 
-	     <li><a href="https://www.linkedin.com/in/julien-musschoot-0b2b50171/" target="_blank" style="text-decoration: none; color: #778da9;">Julien Musschoot </a><img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" alt="LinkedIn" width="50" style="vertical-align: middle;"></li> 
-        </ul>
+        <ul style="font-size: 14px; list-style-type: disc; padding-left: 20px; margin: 0px;">
+	     <li>Arnaud Leleu
+            <a href="https://www.linkedin.com/in/arnaud-leleu-1823a9b1/" target="_blank" style="text-decoration: none;">
+            <img src="{icone_LinkedIn}" alt="{texte_icone_LinkedIn}" width="{taille_icone_LinkedIn}" style="{format_icone_LinkedIn}">
+            </a>
+            </li>
+         <li>Camille Kienlen
+            <a href="https://www.linkedin.com/in/camille-kienlen/" target="_blank" style="text-decoration: none;">
+            <img src="{icone_LinkedIn}" alt="{texte_icone_LinkedIn}" width="{taille_icone_LinkedIn}" style="{format_icone_LinkedIn}">
+            </a>
+            </li>
+	     <li>Clément Guillet
+            <a href="https://www.linkedin.com/in/cl%C3%A9ment-guillet-975a182b8/" target="_blank" style="text-decoration: none;">
+            <img src="{icone_LinkedIn}" alt="{texte_icone_LinkedIn}" width="{taille_icone_LinkedIn}" style="{format_icone_LinkedIn}">
+            </a>
+            </li>
+	     <li>Julien Musschoot
+            <a href="https://www.linkedin.com/in/julien-musschoot-0b2b50171/" target="_blank" style="text-decoration: none;">
+            <img src="{icone_LinkedIn}" alt="{texte_icone_LinkedIn}" width="{taille_icone_LinkedIn}" style="{format_icone_LinkedIn}">
+            </a>
+            </li>
+         </ul>
     </div>
     """,
     unsafe_allow_html=True
