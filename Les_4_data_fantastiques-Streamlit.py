@@ -670,7 +670,9 @@ if page == ml:
             data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Variables", ascending = False)
             top_data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Importance", ascending = False)
             st.dataframe(top_data_importances.head(5))
-            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", title="Top 5 des variables du modèle " + model_name)
+            top_data_importances["Color"] = top_data_importances["Variables"].apply(lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
+            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Top 5 des variables du modèle " + model_name)
+            fig.update_layout(showlegend=False)
             st.plotly_chart(fig)
 #            full_path = build_graphs_path / f"graph_var_imp_{model_name}.png"
 #            st.image(str(full_path), caption=f"Graphique des variables importantes pour le modèle {model_name}", use_column_width=True)
@@ -689,7 +691,9 @@ if page == ml:
             data_importances = data_importances.sort_values(by = "Variables", ascending = False)
             top_data_importances = data_importances.sort_values(by = "Importance", ascending = False)
             st.dataframe(top_data_importances.head(5))
-            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", title="Top 5 des variables du modèle " + model_name)
+            top_data_importances["Color"] = top_data_importances["Variables"].apply(lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
+            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Top 5 des variables du modèle " + model_name)
+            fig.update_layout(showlegend=False)
             st.plotly_chart(fig)
 #            full_path = build_graphs_path / f"graph_var_imp_{model_name}.png"
 #            st.image(str(full_path), caption=f"Graphique des variables importantes pour le modèle {model_name}", use_column_width=True)
