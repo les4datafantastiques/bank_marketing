@@ -22,14 +22,13 @@ Selon la classification de notre projet (modèle supervisé de classification), 
 * **Le rappel (recall en anglais)** est une métrique qui quantifie la proportion d'observations réellement positives qui ont été correctement classifiées positives par le modèle (vrai positifs par rapport à la somme des vrais positifs et faux négatifs). Un score de rappel élevé nous informe que le modèle est capable de bien détecter les observations réellement positives. Cette métrique est utile lorsque le coût des faux négatifs est élevé.
 * **Le score F1 (F1-score en anglais)** est une métrique qui permet de combiner la précision et le rappel, puisqu'elle correspond à leur moyenne harmonique.
 
-C'est dernière métrique, **le score F1**, qui nous parait la plus adaptée pour évaluer nos différents modèles de Machine Learning.
-
+C'est cette dernière métrique, **le score F1**, qui nous parait la plus adaptée pour évaluer nos différents modèles de Machine Learning.
 
 #### Choix du modèle et optimisation
 
 **Choix de l'encodage**
 
-Notre jeu de données ne comporte plus de valeurs manquantes mais contient encore des données quantitatives extrêmes. Nous avons décidé de les conserver car ces informations restent intéressantes pour notre modèle. Nous ne pouvons pas normaliser ou standardiser les variables concernées car ces techniques sont sensibles aux valeurs extrêmes. Nous devrons en revanche tester s’il est pertinent de les mettre à l’échelle par la technique de Robust Scaling. Les variables concernées sont : age, balance, duration, campaign, pdays, previous.
+Notre jeu de données ne comporte plus de valeurs manquantes mais contient encore des données quantitatives extrêmes. Nous avons décidé de les conserver car ces informations ne sont pas aberrantes et restent intéressantes pour notre modèle. Nous ne pouvons pas normaliser ou standardiser les variables concernées car ces techniques sont sensibles aux valeurs extrêmes. Nous devrons en revanche tester s’il est pertinent de les mettre à l’échelle par la technique de Robust Scaling. Les variables concernées sont : age, balance, duration, campaign, pdays, previous.
 
 Les variables catégorielles, quant à elles, devront être encodées de la manière suivante :
 * job : OneHotEncoding
@@ -45,7 +44,7 @@ Les variables catégorielles, quant à elles, devront être encodées de la mani
 
 **Choix des modèles**
 
-Les modèles que nous avons testé sont les suivants :
+Les modèles que nous avons testé sont les suivants :
 * Régression logistique (LogiticRegression)
 * Machines à Vecteurs de Support (SVC)
 * Méthode des K plus proches voisins (KNN - KNeighborsClassifier)
@@ -65,12 +64,18 @@ Nous avons testé nos modèles avec différents paramètres :
 
 **Interprétabilité des modèles**
 
-Nous avons tenté de faire ressortir les variables les plus importantes utilisées par nos différents modèles pour décider du sort de la variable duration. Cependant, nous avons été confrontés à une limite : seuls quelques-uns de nos modèles disposent de l'attribut feature_importances_ ou coef_.
-
-De ce fait, nous avons finalement décidé d'étudier leur interprétabilité avec SHAP (SHapley Additive exPlanations).
+Nous avons tenté de faire ressortir les variables les plus importantes utilisées par nos différents modèles pour décider du sort de la variable duration. Cependant, nous avons été confrontés à une limite : Les modèles KNN et SVM ne disposent pas de l'attribut feature_importances_ ou coef_. Etant donné qu’il ne s’agit pas des modèles les plus performants et que la grande majorité des modèles dispose de ces attributs, nous avons basé nos analyses sur les résultats disponibles en faisant abstraction des éléments manquants.
 
 **Optimisation des hyperparamètres**
 
 Pour optimiser les hyperparamètres, nous avons fait appel à la méthode GridSearch : celle-ci explore toutes les combinaisons possibles d'hyperparamètres spécifiés pour trouver les meilleurs réglages du modèle.
 
+Nous avons également testé RandomizedSearch et BayerSearch, mais sans résultats probants, bien au contraire. Malgré des tests très longs sur ces hyperparamètres extrêmement lourds à faire tourner même en local, les résultats se trouvaient être moins bons qu'avec GridSearch. Nous avons donc décidé de ne pas intégrer ces tests à notre rapport.
+
 Nous avons testé l'optimisation des hyperparamètres sur la quasi-totalité des modèles sélectionnés. Ces tests ont été réalisés en local car ils sont relativement lourds selon les modèles. Pour éviter de surcharger la plateforme Streamlit et ainsi perdre en efficacité, nous ne présenterons l'optimisation des paramètres que pour les 3 modèles qui nous semblent être les plus performants, à savoir : CatBoosting, Extreme Gradient Boosting et Forêts aléatoires.
+
+**Optimisation du chargement des modèles entraînés**
+
+Enfin, dans le but d'optimiser encore davantage la rapidité de notre plateforme Steamlit, nous avons utilisé le module Pickle. Il s’agit d’une bibliothèque standard de Python qui permet de sérialiser et désérialiser des objets. Elle permet de convertir des objets Python en un format binaire qui peut être enregistré sur le disque et récupéré ultérieurement, ce qui en fait un outil extrêmement utile pour la sauvegarde et la restauration de modèles de machine learning. 
+
+Concrètement, nous avons entraîné en local chacun de nos modèles, l’un après l’autre, en modifiant les paramètres selon nos différents angles d’étude. Pour chaque test réalisé, le module pickle nous a permis de sauvegarder le modèle entraîné ainsi que les meilleurs hyperparamètres utilisés le cas échéant. Seuls ces fichiers sont chargés dans Streamlit, les différents modèles n’ont pas à être réentrainés pour visualiser les résultats de nos tests. Notre plateforme est ainsi plus réactive et plus efficace dans la livraison des résultats des tests.
