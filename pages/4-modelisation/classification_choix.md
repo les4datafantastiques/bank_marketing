@@ -4,7 +4,7 @@ Comme nous l’avons vu précédemment, la variable la plus importante de notre 
 
 Nous devons donc mettre en place un modèle d’apprentissage supervisé suivant la technique de la classification (prédiction d’une variable cible de type qualitatif).
 
-Nous avons choisi de nettoyer le dataset avant la modélisation car il y avait peu de données à retraiter et que ces retraitement auront peu d'impact sur la suite de notre projet :
+Nous avons choisi de nettoyer le dataset avant la modélisation car il y avait peu de données à retraiter et que ces retraitements auront peu d'impact sur la suite de notre projet :
 * suppression d'une colonne (contact),
 * suppression de seulement 70 lignes pour valeur job manquante,
 * et remplacement des 427 valeurs manquantes restantes d'education (70 des valeurs manquantes ayant été supprimées avec la suppression des lignes dont job était manquant).
