@@ -18,6 +18,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.compose import ColumnTransformer
 #from sklearn.inspection import permutation_importance
 from sklearn.pipeline import Pipeline
+import shap
 import pickle
 
 from sklearn.linear_model import LogisticRegression
@@ -703,6 +704,26 @@ if page == ml:
                 features[feature][model_name] = importance
         else:
             st.write("Ce modèle ne possède pas d'attribut feature_importances_ ou coef_")
+#       Interprétabilité avec SHAP
+        if model_name in ["Extreme Gradient Boost", "CatBoost"]:
+            explainer = shap.TreeExplainer(model)
+            shap_values = explainer.shap_values(X_test_prepro)
+            mean_shap_values = pd.DataFrame(shap_values, columns=nom_var).abs().mean()
+#           explainer = shap.Explainer(model, X_train_prepro)
+#           shap_values = explainer(X_test_prepro)
+#           mean_shap_values = pd.DataFrame(shap_values.values, columns=nom_var).abs().mean()
+            top_5_shap = mean_shap_values.nlargest(5)
+            top_shap_importances = pd.DataFrame({'Variables': top_5_shap.index, 'Importance SHAP': top_5_shap.values})
+            st.write("Interprétabilité avec SHAP")
+            st.dataframe(top_shap_importances)
+            top_shap_importances["Color"] = top_shap_importances["Variables"].apply(lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
+            fig = px.bar(top_shap_importances, x="Variables", y="Importance SHAP", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Interprétabilité avec SHAP - Top 5 des variables du modèle " + model_name)
+            fig.update_layout(showlegend=False)
+            st.plotly_chart(fig)
+#            full_path = build_graphs_path / f"graph_var_shap_{model_name}.png"
+#            st.image(str(full_path), caption=f"Graphique de l'interprétabilité des variables pour le modèle {model_name}", use_column_width=True)
+        else:
+            st.write("L'interprétabilité n'a pas été réalisée pour ce test.")
     st.write("#### Récapitulatif des meilleurs hyperparamètres")
     if optimisation_hyperparam == "Oui":
         for model_name, params in best_params_list.items():
