@@ -548,7 +548,7 @@ if page == modelisation:
 
 if page == ml:
     st.header(ml)
-    traitement_duration = st.radio("Choisissez le traitement à appliquer à la colonne duration :", ("Supprimer la colonne duration", "Conserver la colonne duration"))
+    traitement_duration = st.radio("Choisissez le traitement à appliquer à la colonne duration :", ("Conserver la colonne duration", "Supprimer la colonne duration"))
     traitement_var_num = st.radio("Choisissez le traitement des variables numériques :", ("Avec RobustScaling", "Sans RobustScaling"))
     traitement_education = st.radio("Choisissez le traitement de la variable education :", ("Ordinal Encoding", "OneHotEncoding"))
     st.write("Pour des raisons d'optimisation des performances de la plateforme, nous ne ferons tourner GridSearch que sur les 3 modèles qui nous semblent être les plus performants, à savoir : CatBoosting, Extreme Gradient Boosting et Forêts aléatoires.")
