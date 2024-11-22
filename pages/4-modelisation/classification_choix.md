@@ -62,7 +62,7 @@ Nous avons testé nos modèles avec différents paramètres :
 * avec Ordinal Encoding / OneHotEncoding pour la variable education
 * avec / sans optimisation des hyperparamètres
 
-**Interprétabilité des modèles**
+**Construction des modèles**
 
 Nous avons tenté de faire ressortir les variables les plus importantes utilisées par nos différents modèles pour décider du sort de la variable duration. Cependant, nous avons été confrontés à une limite : Les modèles KNN et SVM ne disposent pas de l'attribut feature_importances_ ou coef_. Etant donné qu’il ne s’agit pas des modèles les plus performants et que la grande majorité des modèles dispose de ces attributs, nous avons basé nos analyses sur les résultats disponibles en faisant abstraction des éléments manquants.
 
