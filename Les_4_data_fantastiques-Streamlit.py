@@ -51,8 +51,8 @@ df_bank = pd.read_csv(data_path / "bank.csv", sep = ",")
 
 st.title("Bank Marketing")
 st.sidebar.title("Sommaire")
-projet, donnees, visu, modelisation, ml, conclusion = ("Le projet","Le jeu de données","Quelques visualisations","Modélisation","Machine Learning","Conclusion")
-pages=[projet, donnees, visu, modelisation, ml, conclusion]
+projet, donnees, visu, modelisation, ml, outil, conclusion = ("Le projet","Le jeu de données","Quelques visualisations","Modélisation","Machine Learning","Outil de prédiction","Conclusion")
+pages=[projet, donnees, visu, modelisation, ml, outil, conclusion]
 page=st.sidebar.radio("Aller vers :", pages)    
 
 
@@ -738,6 +738,164 @@ if page == ml:
     #st.write("**(selon les paramètres choisis précédemment)**")
     #recap_importances = pd.DataFrame(features).T  # Transposition pour avoir les variables en ligne
     #st.table(recap_importances)
+
+
+df_pred = pd.DataFrame(columns=["age","balance","duration","campaign","pdays","previous", "job", "marital", "education","default","housing","loan","day","month","poutcome"])
+
+traductions = {
+    "oui": "yes",
+    "non": "no",
+    "célibataire": "single",
+    "marié(e)": "married",
+    "divorcé(e)": "divorced",
+    "primaire": "primary",
+    "secondaire": "secondary",
+    "supérieur": "tertiary",
+    "employé de bureau": "admin.", 
+    "technicien": "technician",
+    "service à la personne": "services",
+    "manager": "management",
+    "ouvrier": "blue-collar",
+    "retraité": "retired", 
+    "étudiant": "student",
+    "sans emploi": "unemployed",
+    "entrepreneur": "entrepreneur",
+    "personnel de ménage": "housemaid",
+    "indépendant": "self-employed",
+    "succès": "success",
+    "échec": "failure",
+    "autre": "other",
+    }
+
+def traduction_anglais(francais):
+    if isinstance(francais, str):
+        return traductions.get(francais, francais)  # Traduit si le mot est dans le dictionnaire
+    return francais
+
+if page == outil:
+    st.header(outil)
+    st.write("Renseignez le profil de votre prospect :")
+# Rappel :
+# Options : avec ou sans duration
+# Les autres paramètres sont figés de la manière suivante :
+# avec Robust Scaling / OneHotEncoding pour education / sans optimisation des hyperparamètres 
+# > test 8 (avec duration) et test 5 (sans duration) 
+    choix_age = st.slider("Quel est son âge ?", 18, 95)
+    choix_marital = st.selectbox("Quelle est son statut marital ?", ("célibataire", "marié(e)", "divorcé(e)"))
+    choix_job = st.selectbox("Quel est son métier ?", ("employé de bureau", "technicien", "service à la personne", "manager", "ouvrier", "retraité", "étudiant", "sans emploi", "entrepreneur", "personnel de ménage", "indépendant"))
+    choix_education = st.selectbox("Quelle est son niveau d'études ?", ("primaire", "secondaire", "supérieur"))
+    choix_default = st.radio("Est-il/elle en situation de défaut de paiement ?", ("oui", "non"))
+    choix_balance = st.number_input("Quel est son solde bancaire ?")
+    choix_housing = st.radio("Bénéficie-t-il/elle d'un crédit immobilier ?", ("oui", "non"))
+    choix_loan = st.radio("Bénéficie-t-il/elle d'un crédit à la consommation ?", ("oui", "non"))
+    choix_date_contact_prevu = st.date_input("A quelle date prévoyez-vous de contacter le prospect ?")
+    if st.checkbox("Je souhaite renseigner une durée d'appel prévisionnelle"):
+        choix_duration = st.slider("Durée prévue du contact téléphonique (en minutes) ?", 0, 60)
+        df_pred.loc[0,"duration"] = choix_duration*60
+    else:
+        df_pred.loc[0,"duration"] = "unknown"
+    df_pred.loc[0,"age"] = choix_age
+    df_pred.loc[0,"marital"] = choix_marital
+    df_pred.loc[0,"job"] = choix_job
+    df_pred.loc[0,"education"] = choix_education
+    df_pred.loc[0,"default"] = choix_default
+    df_pred.loc[0,"balance"] = choix_balance
+    df_pred.loc[0,"housing"] = choix_housing
+    df_pred.loc[0,"loan"] = choix_loan
+    df_pred.loc[0,"day"] = choix_date_contact_prevu.day
+    mois_texte = {1: "jan", 2: "feb", 3: "mar", 4: "apr", 5: "may", 6: "jun", 7: "jul", 8: "aug", 9: "sep", 10: "oct", 11: "nov", 12: "dec"}
+    df_pred.loc[0,"month"] = mois_texte[choix_date_contact_prevu.month]
+    choix_contact = st.radio("Le prospect a-t-il/elle déjà été contacté auparavant ?", ("oui, uniquement pour la campagne actuelle", "oui, uniquement pour la campagne précédente", "oui, pour les 2 campagnes", "non"))
+    if choix_contact == "non":
+        df_pred.loc[0,"campaign"] = 1
+        df_pred.loc[0,"pdays"] = -1
+        df_pred.loc[0,"previous"] = 0
+        df_pred.loc[0,"poutcome"] = "unknown"
+    elif choix_contact == "oui, uniquement pour la campagne actuelle":
+        choix_campaign = st.slider("Combien de fois le prospect a-t-il été contacté pour cette campagne (y compris le contact prévu prochainement) ?", 2, 10)
+        df_pred.loc[0,"campaign"] = choix_campaign
+        df_pred.loc[0,"pdays"] = -1
+        df_pred.loc[0,"previous"] = 0
+        df_pred.loc[0,"poutcome"] = "unknown"
+    elif choix_contact == "oui, uniquement pour la campagne précédente":
+        choix_previous = st.slider("Combien de fois le prospect a-t-il été contacté pour une campagne précédente ?", 1, 60)
+        choix_date_contact_prec = st.date_input("Quelle était la date de votre dernier contact pour la campagne précédente ?") 
+        choix_poutcome = st.selectbox("Quel a été le résultat de la campagne précédente ?", ("succès", "échec", "autre"))
+        df_pred.loc[0,"campaign"] = 1
+        df_pred.loc[0,"pdays"] = (choix_date_contact_prevu - choix_date_contact_prec).days
+        df_pred.loc[0,"previous"] = choix_previous
+        df_pred.loc[0,"poutcome"] = choix_poutcome
+    elif choix_contact == "oui, pour les 2 campagnes":
+        choix_campaign = st.slider("Combien de fois le prospect a-t-il été contacté pour cette campagne (y compris le contact prévu prochainement) ?", 2, 10)
+        choix_previous = st.slider("Combien de fois le prospect a-t-il été contacté pour une campagne précédente ?", 1, 60)
+        choix_date_contact_prec = st.date_input("Quelle était la date de votre dernier contact pour la campagne précédente ?") 
+        choix_poutcome = st.selectbox("Quel a été le résultat de la campagne précédente ?", ("succès", "échec", "autre"))
+        df_pred.loc[0,"campaign"] = choix_campaign
+        df_pred.loc[0,"pdays"] = (choix_date_contact_prevu - choix_date_contact_prec).days
+        df_pred.loc[0,"previous"] = choix_previous
+        df_pred.loc[0,"poutcome"] = choix_poutcome
+    df_pred = df_pred.applymap(traduction_anglais)
+    model_name = "CatBoost"
+    if df_pred["duration"][0] == "unknown":
+        num_test = 5
+        df = df_bank_2
+        df_pred = df_pred.drop("duration", axis=1)
+        var_num = ["age","balance","campaign","pdays","previous"]
+    else:
+        num_test = 8
+        df = df_bank_1
+        var_num = ["age","balance","duration","campaign","pdays","previous"]
+    var_cat_for_ohe = ["job","marital", "education","default","housing","loan","day","month","poutcome"]
+    data = df.drop("deposit", axis = 1)
+    target = df["deposit"]
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size = 0.30, random_state = 88)
+    prepro = ColumnTransformer(transformers = [("numerical", num_scaler, var_num), ("categorical_ohe", ohe, var_cat_for_ohe)])
+    X_train_prepro = prepro.fit_transform(X_train)
+    y_train = le.fit_transform(y_train)
+
+    df_pred_prepro = prepro.transform(df_pred)
+
+    test_path = build_ml_path / f"test{num_test}" 
+    model_file = test_path / f"ml_test{num_test}_{model_name}_model.pkl"
+    with open(model_file, "rb") as f:
+        model = pickle.load(f)
+
+    # Prédiction
+    y_pred = model.predict(df_pred_prepro)
+    y_pred_proba = model.predict_proba(df_pred_prepro)[:,1]
+    y_pred_proba_pourcentage = round(y_pred_proba[0]*100, 1)
+
+    # Affichage des résultats
+    st.write("##### Ce prospect est-il susceptible de souscrire un dépôt à terme lors de cette campagne ?")
+
+    if y_pred[0] == 1:
+        if y_pred_proba_pourcentage > 70:
+            st.markdown("""
+                        <h1 style='color: green; text-align: center;'>
+                        Oui
+                        </h1>
+                        """,
+                        unsafe_allow_html=True
+                        )
+            st.write("Ce prospect présente une probabilité de ", y_pred_proba_pourcentage,"% de souscrire un dépôt à terme.")
+        else:
+            st.markdown("""
+                        <h1 style='color: orange; text-align: center;'>
+                        Oui
+                        </h1>
+                        """,
+                        unsafe_allow_html=True
+                        )
+            st.write("Mais attention, ce prospect ne présente qu'une probabilité de ", y_pred_proba_pourcentage,"% de souscrire un dépôt à terme.")
+    else:
+        st.markdown("""
+                    <h1 style='color: red; text-align: center;'>
+                    Non
+                    </h1>
+                    """,
+                    unsafe_allow_html=True
+                    )
+        st.write("Ce prospect ne présente qu'une probabilité de ", y_pred_proba_pourcentage,"% de souscrire un dépôt à terme.")
 
 
 
