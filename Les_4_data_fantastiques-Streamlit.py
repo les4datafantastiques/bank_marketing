@@ -108,6 +108,8 @@ txt_conclusion_prepocess = open(donnees_path / 'conclusion_preprocess.md').read(
 txt_classif_choix = open(modelisation_path / 'classification_choix.md').read()
 txt_interpretation = open(modelisation_path / 'interpretation.md').read()
 
+# Fichier exploité pour la page de conclusion du projet
+txt_conclusion_generale = open(conclusion_path / 'conclusion.md').read()
 
 if page == projet:
     st.header(projet)
@@ -528,15 +530,15 @@ oe = OrdinalEncoder(categories = [["primary", "secondary", "tertiary"]])
 num_scaler = RobustScaler()
 
 models = {
+        "CatBoost" : CatBoostClassifier(silent = True),  # 'silent=True' pour éviter les logs
+        "Random Forest": RandomForestClassifier(),
+        "Extreme Gradient Boost" : XGBClassifier(),
+        "Gradient Boost" : GradientBoostingClassifier(),
         "Logistic Regression": LogisticRegression(max_iter = 1000),
-        "SVM": SVC(),
-        "KNN" : neighbors.KNeighborsClassifier(),
         "Decision Tree Classifier": DecisionTreeClassifier(),
         "Decision Tree Regressor": DecisionTreeRegressor(),
-        "Random Forest": RandomForestClassifier(),
-        "Gradient Boost" : GradientBoostingClassifier(),
-        "Extreme Gradient Boost" : XGBClassifier(),
-        "CatBoost" : CatBoostClassifier(silent = True)  # 'silent=True' pour éviter les logs
+        "SVM": SVC(),
+        "KNN" : neighbors.KNeighborsClassifier()
         }
 
 
@@ -901,3 +903,5 @@ if page == outil:
 
 if page == conclusion:
     st.header(conclusion)
+    st.markdown(txt_conclusion_generale)
+
