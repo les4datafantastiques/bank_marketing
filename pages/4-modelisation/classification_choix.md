@@ -79,3 +79,14 @@ Nous avons testé l'optimisation des hyperparamètres sur la quasi-totalité des
 Enfin, dans le but d'optimiser encore davantage la rapidité de notre plateforme Steamlit, nous avons utilisé le module Pickle. Il s’agit d’une bibliothèque standard de Python qui permet de sérialiser et désérialiser des objets. Elle permet de convertir des objets Python en un format binaire qui peut être enregistré sur le disque et récupéré ultérieurement, ce qui en fait un outil extrêmement utile pour la sauvegarde et la restauration de modèles de machine learning. 
 
 Concrètement, nous avons entraîné en local chacun de nos modèles, l’un après l’autre, en modifiant les paramètres selon nos différents angles d’étude. Pour chaque test réalisé, le module pickle nous a permis de sauvegarder le modèle entraîné ainsi que les meilleurs hyperparamètres utilisés le cas échéant. Seuls ces fichiers sont chargés dans Streamlit, les différents modèles n’ont pas à être réentrainés pour visualiser les résultats de nos tests. Notre plateforme est ainsi plus réactive et plus efficace dans la livraison des résultats des tests.
+
+**Interprétabilité des modèles**
+
+Concernant l’interprétabilité de nos 3 modèles les plus performants (CatBoost, Random Forest, Extreme Gradient Boost), nous avons pris le parti de la mesurer avec SHAP (Shapley Additive exPlanations). Cette méthode attribue une valeur à chaque variable utilisée par un modèle donné de machine learning, mesurant son impact sur la prédiction ﬁnale. L’avantage de SHAP est qu’il considère l’ensemble des combinaisons de caractéristiques possibles pour en évaluer leur impact moyen, garantissant ainsi une interprétation équitable.
+
+Après avoir préparé les données, nous avons réduit l’échantillon d’observations analysées par SHAP à 1 000 aﬁn de limiter son calcul, bien trop lourd sans cette limitation.
+
+SHAP nous a permis de :
+* Conﬁrmer l’importance extrême de la variable duration sur CatBoost (3.75 fois plus importante que la seconde valeur).
+* Corriger la place de duration sur XGBoost, là où la feature_importance ne la faisait apparaître qu’en 4ème position, 3.75 fois moins importante qu’une autre variable (alors qu’avec SHAP elle
+est 3.9 fois plus importante).

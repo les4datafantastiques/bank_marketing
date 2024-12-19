@@ -1,6 +1,6 @@
 Nom de la colonne;Description;Type info.;Taux de NaN;Distribution des valeurs;Type de variable;Commentaire / Retraitements à réaliser
 age;âge du client lors du dépôt;int64;0 %;de 18 à 95 ans avec une concentration entre 32 (Q1) et 49 (Q3) ans;quantitative;"Distribution cohérente mais très concentrée autour de la médiane ;
-Pas de retraitement, la création de catégories pourra néanmoins servir pour le profiling"
+Pas de retraitement"
 job;métier pratiqué;object;1 %;['admin.' 'technician' 'services' 'management' 'retired' 'blue-collar' 'unemployed' 'entrepreneur' 'housemaid' 'unknown' 'self-employed' 'student'];catégorielle;"70 lignes « unknown », impact dérisoire étant donné la volumétrie totale (+ de 11 000 lignes) ;
 Supprimer les lignes dont la donnée est manquante"
 marital;statut marital;object;0 %;['married' 'single' 'divorced'];catégorielle;
@@ -8,7 +8,7 @@ education;niveau d'études;object;4 %;['secondary' 'tertiary' 'primary' 'unknown
 Contrôle des valeurs prises par education pour chacun des jobs. Le résultat de ce test fait ressortir un type d’education clairement défini pour chaque job, sauf pour retired et entrepreneur où le résultat est moins flagrant. Etant donné le faible nombre d’occurrences de ces 2 jobs, nous pouvons en faire abstraction et appliquer une méthode commune pour tout le dataset : remplacement des valeurs « unknown » par la modalité la plus fréquente de education pour le job de la ligne concernée."
 default;le crédit est-il en défaut ?;object;0 %;['yes' 'no'];catégorielle;Très peu de défauts de crédit dans le dataset
 balance;solde bancaire annuel moyen;int64;0 %;de -6847 à 81 204 euros avec une concentration entre 122 (Q1) et 1708 (Q3);quantitative;"Distribution concentrée autour de la médiane, pas de valeurs aberrantes ;
-Pas de retraitement, la création de catégories pourra néanmoins servir pour le profiling"
+Pas de retraitement"
 housing;le client bénéficie-t-il d’un crédit immobilier ?;object;0 %;['yes' 'no'];catégorielle;
 loan;le client bénéficie-t-il d’un prêt personnel ?;object;0 %;['yes' 'no'];catégorielle;Très peu de prêts personnels dans le dataset
 contact;moyen de contacter le client;object;21 %;['unknown' 'cellular' 'telephone'];catégorielle;"Donnée peu pertinente : proportion beaucoup plus importante de cellular, pour « unknown » beaucoup de non souscriptions ;

@@ -210,7 +210,6 @@ if page == visu:
                 yaxis=dict(gridcolor="rgba(210,210,210,0.5)")
                 )
             st.plotly_chart(fig_var_num_deposit)
-            st.write("Nous ne créerons pas de catégories d’âge pour le modèle de Machine Learning. Nous pourrons néanmoins les prévoir pour établir un profil type de clients susceptibles de souscrire un dépôt à terme.")
             st.write("Nous pouvons d’ores et déjà constater que le ratio souscriptions/non-souscriptions est en faveur des prospects âgés de moins de 29 ans ou plus de 60 ans.")
         if choix_var_num == "balance":
             st.write("Distribution cohérente, concentrée autour de la médiane, pas de valeurs aberrantes.")
@@ -241,7 +240,6 @@ if page == visu:
                 yaxis=dict(gridcolor="rgba(210,210,210,0.5)")
                 )
             st.plotly_chart(fig_var_num_deposit)
-            st.write("Nous ne créerons pas de catégories pour le modèle de Machine Learning. Nous pourrons néanmoins les prévoir pour étudier un profil type de clients susceptibles de souscrire un dépôt à terme.")
             st.write("Le ratio souscriptions/non-souscriptions est négatif pour les clients dont le solde bancaire est négatif ou faible (inférieur à 800 euros), ce qui parait plutôt cohérent.")
         if choix_var_num == "duration":
             st.markdown("En théorie, pour le Machine Learning, une variable doit être connue a priori, ce qui n’est pas le cas de la variable distribution. Nous verrons par la suite, lors de l’interprétation de nos modèles, si cette variable est importante ou non pour la prédiction.")

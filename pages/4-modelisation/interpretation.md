@@ -16,3 +16,11 @@ Le fait d’encoder la variable education en Ordinal Encoding ou OneHotEncoding 
 L’utilisation d’hyperparamètres ne semble pas avoir d’impact sur nos modèles.
 
 Nous pouvons conclure de tous nos essais que les modèles de base sont très bien optimisés pour l'utilisation dans notre dataset.
+
+Le modèle plus performant est celui du **CatBoosting** utilisé en suivant les paramètres ci-après : 
+* avec duration
+* RobustScaling sur les variables numériques
+* OneHotEncoding pour l'encodage de la variable duration
+* sans optimisation des hyperparamètres
+
+C’est donc ce modèle CatBoost qui servira à la conception de notre outil de prédiction. La durée de l’appel représente une importance non négligeable dans le modèle, mais étant donné sa potentielle indisponibilité, il nous parait utile de prévoir deux options. Ainsi, notre outil proposera de renseigner cette donnée en vue de la prédiction, mais permettra également d’obtenir un résultat dans le cas où elle serait absente.
