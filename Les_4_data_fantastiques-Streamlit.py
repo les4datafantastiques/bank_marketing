@@ -6,30 +6,26 @@
 
 import streamlit as st
 import io
-#import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 import xgboost as xgb
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import RobustScaler, OneHotEncoder, LabelEncoder, OrdinalEncoder
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.compose import ColumnTransformer
-#from sklearn.inspection import permutation_importance
-from sklearn.pipeline import Pipeline
 import shap
 import pickle
 
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn import neighbors
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier, Pool
 
 from pathlib import Path
+from PIL import Image
+from wordcloud import WordCloud
 
 project_root = Path('.')
 data_path = project_root / 'data'
@@ -46,8 +42,17 @@ ml_path = pages_path / '5-ml'
 conclusion_path = pages_path / '6-conclusion'
 
 
-# Création d'un dataframe pour lire le data set
+# Récupération des dataframes
+
+# Dataset d'origine
 df_bank = pd.read_csv(data_path / "bank.csv", sep = ",")
+
+# Datasets retraités
+# retraitements minimalistes :
+df_bank_1 = pd.read_csv(build_df_path/ "bank_1.csv", sep = ",")
+# sans duration :
+df_bank_2 = pd.read_csv(build_df_path / "bank_2.csv", sep = ",")
+
 
 st.title("Bank Marketing")
 st.sidebar.title("Sommaire")
@@ -95,8 +100,9 @@ st.sidebar.markdown(
 )
 
 
-# Exploitation d'un fichier .md pour la page de présentation du projet
+# Fichiers exploités pour la page de présentation du projet
 txt_projet = open(projet_path / 'contexte_et_objectifs.md').read()
+banniere_projet = Image.open(projet_path / 'ban_projet.png')
 
 # Fichiers exploités sur la page de présentation du jeu de données
 txt_cadre = open(donnees_path / 'cadre.md').read()
@@ -107,14 +113,39 @@ txt_conclusion_prepocess = open(donnees_path / 'conclusion_preprocess.md').read(
 # Fichiers exploités pour la page de modélisation du projet
 txt_classif_choix = open(modelisation_path / 'classification_choix.md').read()
 txt_interpretation = open(modelisation_path / 'interpretation.md').read()
+banniere_modelisation = Image.open(modelisation_path / 'ban_modelisation.png')
 
 # Fichier exploité pour la page de conclusion du projet
 txt_conclusion_generale = open(conclusion_path / 'conclusion.md').read()
+banniere_conclusion = Image.open(conclusion_path / 'ban_conclusion.png')
+
+# Fonction de génération des bannières
+def banniere(texte_banniere):
+    wordcloud = WordCloud(
+    width=800, 
+    height=200, 
+    background_color="white", 
+    colormap="Reds",
+    max_font_size=100, 
+    min_font_size=10
+    ).generate(texte_banniere)
+    fig, ax = plt.subplots(figsize=(10, 3))
+    ax.imshow(wordcloud, interpolation="bilinear")
+    ax.axis("off")
+    return fig
+
 
 if page == projet:
     st.header(projet)
+    st.markdown("<br>" * 2, unsafe_allow_html=True)
+    st.image(banniere_projet, use_column_width=True)
+    st.markdown("<br>" * 3, unsafe_allow_html=True)
+#    texte_ban_projet = "Streamlit Python Bank Data Projet Prospects"
+#    ban = banniere(texte_ban_projet)
+#    st.pyplot(ban)
     st.markdown(txt_projet)
-    
+
+
 if page == donnees:
     st.header(donnees)
     st.markdown(txt_cadre)
@@ -131,7 +162,6 @@ if page == donnees:
     st.markdown(txt_pertinence)
     st.markdown("#### Pre-processing et feature engineering")
     st.write("**Nombre de valeurs en doublon dans le dataframe :**", df_bank.duplicated().sum())
-#   st.write("**Nombre de valeurs manquantes par colonne :**", df_bank.isna().sum())
     st.markdown("**Valeurs prises par les différentes variables catégorielles :**")
     if st.checkbox("Afficher les valeurs prises par les différentes variables catégorielles"):
         for column in df_bank.select_dtypes(include='object').columns:
@@ -144,8 +174,6 @@ if page == donnees:
         st.markdown("**Récapitulatif des informations dont nous disposons sur les différentes variables du dataset :**")
         st.table(df_pertinence)
     st.markdown(txt_conclusion_prepocess)
-
-
 
 
 
@@ -165,7 +193,6 @@ if page == visu:
     choix_type_var = st.selectbox("Choisissez le type de variable à afficher :", ("Variables quantitatives", "Variables catégorielles"))
     if choix_type_var == "Variables quantitatives":
         choix_var_num = st.selectbox("Choisissez la variable quantitative à afficher :", (var_num))
-#       st.write("##### Variable", choix_var_num)
 #       Boxplot de distribution de la variable quantitative
         fig_num = go.Figure()
         fig_num.add_trace(go.Box(
@@ -335,7 +362,6 @@ if page == visu:
             st.write("Une grande partie des souscriptions lors de cette campagne ont été réalisées par des nouveaux prospects. Néanmoins, le ratio souscription/non-souscription est plus intéressant pour les clients ayant déjà été contactés lors de précédentes campagnes marketing.")
     if choix_type_var == "Variables catégorielles":
         choix_var_cat = st.selectbox("Choisissez la variable catégorielle à afficher :", (var_cat))
-#       st.write("##### Variable", choix_var_cat)
 #       Histogramme variable catégorielle / deposit
         if choix_var_cat not in ("day", "month"):
             fig_var_cat_deposit = go.Figure()
@@ -480,46 +506,6 @@ if page == visu:
 
 
 
-# RETRAITEMENTS POUR GENERER df_bank_0 (Base utilisée uniquement pour le profiling)
-
-# Création d'un dataframe df_bank_0 copie de df_bank :
-df_bank_0 = df_bank.copy()
-# Création d'une fonction qui définit la catégorie d'âge sur la base de "age":
-def get_categ(age):
-	if age <= 31:
-		categ = "extreme_bas"
-	elif 31 < age <= 40:
-		categ = "jeune"
-	elif 30 < age <= 49:
-		categ = "moins_jeune"
-	elif 49 < age:
-		categ = "extreme_haut"
-	return categ
-df_bank_0["age_categ"] = df_bank_0["age"].apply(get_categ)
-# Export du dataframe df_bank_1 en fichier .csv
-#df_bank_0.to_csv(build_df_path / 'bank_0_profiling.csv', index=False, sep=',')
-
-
-# RETRAITEMENTS POUR GENERER df_bank_1 (retraitements de base)
-
-# Suppression des lignes dont la valeur "job" est manquante :
-df_bank_1 = df_bank.loc[df_bank["job"] != "unknown"]
-# Remplacement des unknown de "education" par la modalité la plus fréquente rencontrée pour un "job" identique :
-df_bank_1.loc[df_bank_1["education"] == "unknown", "education"] = df_bank_1.loc[df_bank_1["education"] == "unknown", "job"].map(jobs_education)		
-# Suppression de la colonne "contact" :
-df_bank_1 = df_bank_1.drop("contact", axis=1)
-# Export du dataframe df_bank_1 en fichier .csv
-#df_bank_1.to_csv(build_df_path / 'bank_1.csv', index=False, sep=',')
-
-
-# RETRAITEMENTS SUPPLEMENTAIRES POUR GENERER df_bank_2 (sans duration)
-
-# Suppression de la colonne "duration" :
-df_bank_2 = df_bank_1.drop("duration", axis=1)
-# Export du dataframe df_bank_2 en fichier .csv
-#df_bank_2.to_csv(build_df_path / 'bank_2.csv', index=False, sep=',')
-
-
 # Mise en place du tronc commun à tous nos tests de machine learning
 
 le = LabelEncoder()
@@ -531,17 +517,21 @@ models = {
         "CatBoost" : CatBoostClassifier(silent = True),  # 'silent=True' pour éviter les logs
         "Random Forest": RandomForestClassifier(),
         "Extreme Gradient Boost" : XGBClassifier(),
-        "Gradient Boost" : GradientBoostingClassifier(),
-        "Logistic Regression": LogisticRegression(max_iter = 1000),
-        "Decision Tree Classifier": DecisionTreeClassifier(),
-        "Decision Tree Regressor": DecisionTreeRegressor(),
-        "SVM": SVC(),
-        "KNN" : neighbors.KNeighborsClassifier()
         }
 
 
 if page == modelisation:
     st.header(modelisation)
+    st.markdown("<br>" * 2, unsafe_allow_html=True)
+    st.image(banniere_modelisation, use_column_width=True)
+    st.markdown("<br>" * 3, unsafe_allow_html=True)
+#    texte_ban_visu = "Plotly Preprocessing Dataviz Modélisation Unknown"
+#    ban = banniere(texte_ban_visu)
+#    st.pyplot(ban)
+#    st.image(banniere_ml, use_column_width=True)
+#    texte_ban_ml = "Machine_Learning Encodage Hyperparamètres F1_score"
+#    ban = banniere(texte_ban_ml)
+#    st.pyplot(ban)
     st.markdown(txt_classif_choix)
     st.markdown(txt_interpretation)
 
@@ -551,9 +541,9 @@ if page == ml:
     st.header(ml)
     traitement_duration = st.radio("Choisissez le traitement à appliquer à la colonne duration :", ("Conserver la colonne duration", "Supprimer la colonne duration"))
     traitement_var_num = st.radio("Choisissez le traitement des variables numériques :", ("Avec RobustScaling", "Sans RobustScaling"))
-    traitement_education = st.radio("Choisissez le traitement de la variable education :", ("Ordinal Encoding", "OneHotEncoding"))
+    traitement_education = st.radio("Choisissez le traitement de la variable education :", ("OneHotEncoding", "Ordinal Encoding"))
     st.write("Pour des raisons d'optimisation des performances de la plateforme, nous ne ferons tourner GridSearch que sur les 3 modèles qui nous semblent être les plus performants, à savoir : CatBoosting, Extreme Gradient Boosting et Forêts aléatoires.")
-    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres pour les 3 modèles les plus performants ?", ("Oui", "Non"))
+    optimisation_hyperparam = st.radio("Souhaitez-vous optimiser les hyperparamètres pour les 3 modèles les plus performants ?", ("Non", "Oui"))
     if traitement_duration == "Conserver la colonne duration":
         df = df_bank_1
         var_num = ["age","balance","duration","campaign","pdays","previous"]
@@ -603,7 +593,7 @@ if page == ml:
 #            14 : sans la variable duration / sans Robust Scaling / OneHotEncoding pour education / sans optimisation des hyperparamètres
 #            15 : sans la variable duration / sans Robust Scaling / OneHotEncoding pour education / avec optimisation des hyperparamètres
 #            16 : avec la variable duration / avec Robust Scaling / OneHotEncoding pour education / avec optimisation des hyperparamètres
-#    """
+#    """    
     if traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Sans RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Non":
         num_test = 1
     elif traitement_duration == "Conserver la colonne duration" and traitement_var_num == "Avec RobustScaling" and traitement_education == "Ordinal Encoding" and optimisation_hyperparam == "Non":
@@ -644,7 +634,7 @@ if page == ml:
         with open(model_file, "rb") as f:
             model = pickle.load(f)
         st.write("#### Modèle testé : " + model_name)
-        if optimisation_hyperparam == "Oui" and (model_name in ["Random Forest", "Extreme Gradient Boost", "CatBoost"]):
+        if optimisation_hyperparam == "Oui" :
             params_file = test_path / f"ml_test{num_test}_{model_name}_best_params.pkl"
             with open(params_file, "rb") as f:
                 best_params = pickle.load(f)
@@ -675,14 +665,11 @@ if page == ml:
             fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Top 5 des variables du modèle " + model_name)
             fig.update_layout(showlegend=False)
             st.plotly_chart(fig)
-#            full_path = build_graphs_path / f"graph_var_imp_{model_name}.png"
-#            st.image(str(full_path), caption=f"Graphique des variables importantes pour le modèle {model_name}", use_column_width=True)
             for feature, importance in zip(nom_var, importance):
                 if feature not in features:
                     features[feature] = {}
                 features[feature][model_name] = importance
         elif model_name == "Logistic Regression":
-#           coef = model.coef_[0]
             coef = model.coef_
             if coef.ndim == 1:  # Si c'est un tableau 1D (ce qui arrive parfois en classification binaire)
                 coef = coef.reshape(1, -1)
@@ -696,8 +683,6 @@ if page == ml:
             fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Top 5 des variables du modèle " + model_name)
             fig.update_layout(showlegend=False)
             st.plotly_chart(fig)
-#            full_path = build_graphs_path / f"graph_var_imp_{model_name}.png"
-#            st.image(str(full_path), caption=f"Graphique des variables importantes pour le modèle {model_name}", use_column_width=True)
             for feature, importance in zip(nom_var, data_importances["Importance"]):
                 if feature not in features:
                     features[feature] = {}
@@ -734,10 +719,6 @@ if page == ml:
     st.write("#### Récapitulatif des performances des différents modèles")
     st.write("**(selon les paramètres choisis précédemment)**")
     st.dataframe(recap_resultats)
-    #st.write("#### Importances des variables pour chacun des modèles")
-    #st.write("**(selon les paramètres choisis précédemment)**")
-    #recap_importances = pd.DataFrame(features).T  # Transposition pour avoir les variables en ligne
-    #st.table(recap_importances)
 
 
 df_pred = pd.DataFrame(columns=["age","balance","duration","campaign","pdays","previous", "job", "marital", "education","default","housing","loan","day","month","poutcome"])
@@ -901,5 +882,11 @@ if page == outil:
 
 if page == conclusion:
     st.header(conclusion)
+    st.markdown("<br>" * 2, unsafe_allow_html=True)
+    st.image(banniere_conclusion, use_column_width=True)
+    st.markdown("<br>" * 3, unsafe_allow_html=True)
+#    texte_ban_conclusion = "Perspectives Améliorations Développement Recommandations Automatisation"
+#    ban = banniere(texte_ban_conclusion)
+#    st.pyplot(ban)
     st.markdown(txt_conclusion_generale)
 
