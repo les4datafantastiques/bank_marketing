@@ -25,7 +25,7 @@ from catboost import CatBoostClassifier, Pool
 
 from pathlib import Path
 from PIL import Image
-from wordcloud import WordCloud
+#from wordcloud import WordCloud
 
 project_root = Path('.')
 data_path = project_root / 'data'
