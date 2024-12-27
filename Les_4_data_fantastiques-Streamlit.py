@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-# Import des librairies
+#Import des librairies
 
 #from IPython.display import display
-
 import streamlit as st
 import io
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
@@ -25,14 +25,20 @@ from catboost import CatBoostClassifier, Pool
 
 from pathlib import Path
 from PIL import Image
+from scipy.sparse import csr_matrix
 #from wordcloud import WordCloud
 
+#Chemins d'accès
 project_root = Path('.')
 data_path = project_root / 'data'
 build_path = project_root / 'build'
+build_path.mkdir(exist_ok=True)
 build_df_path = build_path / 'df'
+build_df_path.mkdir(exist_ok=True)
 build_graphs_path = build_path / 'graphs'
+build_graphs_path.mkdir(exist_ok=True)
 build_ml_path = build_path / 'ml'
+build_ml_path.mkdir(exist_ok=True)
 pages_path = project_root / 'pages'
 projet_path = pages_path / '1-projet'
 donnees_path = pages_path / '2-donnees'
@@ -42,15 +48,15 @@ ml_path = pages_path / '5-ml'
 conclusion_path = pages_path / '6-conclusion'
 
 
-# Récupération des dataframes
+#Récupération des dataframes
 
-# Dataset d'origine
+#Dataset d'origine
 df_bank = pd.read_csv(data_path / "bank.csv", sep = ",")
 
-# Datasets retraités
-# retraitements minimalistes :
+#Datasets retraités
+#retraitements minimalistes :
 df_bank_1 = pd.read_csv(build_df_path/ "bank_1.csv", sep = ",")
-# sans duration :
+#sans duration :
 df_bank_2 = pd.read_csv(build_df_path / "bank_2.csv", sep = ",")
 
 
@@ -100,26 +106,26 @@ st.sidebar.markdown(
 )
 
 
-# Fichiers exploités pour la page de présentation du projet
+#Fichiers exploités pour la page de présentation du projet
 txt_projet = open(projet_path / 'contexte_et_objectifs.md').read()
 banniere_projet = Image.open(projet_path / 'ban_projet.png')
 
-# Fichiers exploités sur la page de présentation du jeu de données
+#Fichiers exploités sur la page de présentation du jeu de données
 txt_cadre = open(donnees_path / 'cadre.md').read()
 txt_pertinence = open(donnees_path / 'pertinence.md').read()
 df_pertinence = pd.read_csv(donnees_path / "tableau_variables.csv", sep = ";", index_col=0, lineterminator="\n")
 txt_conclusion_prepocess = open(donnees_path / 'conclusion_preprocess.md').read()
 
-# Fichiers exploités pour la page de modélisation du projet
+#Fichiers exploités pour la page de modélisation du projet
 txt_classif_choix = open(modelisation_path / 'classification_choix.md').read()
 txt_interpretation = open(modelisation_path / 'interpretation.md').read()
 banniere_modelisation = Image.open(modelisation_path / 'ban_modelisation.png')
 
-# Fichier exploité pour la page de conclusion du projet
+#Fichier exploité pour la page de conclusion du projet
 txt_conclusion_generale = open(conclusion_path / 'conclusion.md').read()
 banniere_conclusion = Image.open(conclusion_path / 'ban_conclusion.png')
 
-# Fonction de génération des bannières
+#Fonction de génération des bannières
 def banniere(texte_banniere):
     wordcloud = WordCloud(
     width=800, 
@@ -193,7 +199,7 @@ if page == visu:
     choix_type_var = st.selectbox("Choisissez le type de variable à afficher :", ("Variables quantitatives", "Variables catégorielles"))
     if choix_type_var == "Variables quantitatives":
         choix_var_num = st.selectbox("Choisissez la variable quantitative à afficher :", (var_num))
-#       Boxplot de distribution de la variable quantitative
+        #Boxplot de distribution de la variable quantitative
         fig_num = go.Figure()
         fig_num.add_trace(go.Box(
             x=df_bank[choix_var_num],
@@ -210,7 +216,7 @@ if page == visu:
         st.plotly_chart(fig_num)
         if choix_var_num == "age":
             st.write("Distribution cohérente, concentrée autour de la médiane, pas de valeurs aberrantes.")
-#           Histogramme age / deposit
+            #Histogramme age / deposit
             fig_var_num_deposit = go.Figure()
             fig_var_num_deposit.add_trace(go.Histogram(
                 x=df_bank[df_bank["deposit"] == "no"][choix_var_num],
@@ -240,7 +246,7 @@ if page == visu:
             st.write("Nous pouvons d’ores et déjà constater que le ratio souscriptions/non-souscriptions est en faveur des prospects âgés de moins de 29 ans ou plus de 60 ans.")
         if choix_var_num == "balance":
             st.write("Distribution cohérente, concentrée autour de la médiane, pas de valeurs aberrantes.")
-#           Histogramme balance / deposit
+            #Histogramme balance / deposit
             fig_var_num_deposit = go.Figure()
             fig_var_num_deposit.add_trace(go.Histogram(
                 x=df_bank[(df_bank["deposit"] == "no") & (df_bank["balance"] > -800) & (df_bank["balance"] < 4000)][choix_var_num],
@@ -273,7 +279,7 @@ if page == visu:
             st.markdown("- Si elle figure dans le top 5 des variables utilisées par le modèle, nous la conserverons.") 
             st.markdown("- Sinon, nous la supprimerons pour le Machine Learning, mais nous la conserverons pour émettre des recommandations métier. Cette information peut être utilisée pour valoriser l’intérêt suscité chez le client lors de la campagne passée et l’exploiter pour des prospections futures (plus l’appel était long, plus le client semblait intéressé et donc potentiel prospect pour la prochaine campagne)")
         if choix_var_num == "campaign":
-#           Histogramme campaign / deposit
+            #Histogramme campaign / deposit
             fig_var_num_deposit = go.Figure()
             fig_var_num_deposit.add_trace(go.Histogram(
                 x=df_bank[df_bank["deposit"] == "no"][df_bank["campaign"] <= 8][choix_var_num],
@@ -302,7 +308,7 @@ if page == visu:
             st.plotly_chart(fig_var_num_deposit)
             st.write("Cette information peut être utilisée en complément d’un travail de profiling, pour adapter la méthode d’approche. En l’occurrence, le ratio gain (souscription) / perte (effort fourni pour le démarchage) semble ne plus être intéressant au-delà d’un appel.")
         if choix_var_num == "pdays":
-#           Histogramme pdays / deposit
+            #Histogramme pdays / deposit
             fig_var_num_deposit = go.Figure()
             fig_var_num_deposit.add_trace(go.Histogram(
                 x=df_bank[df_bank["deposit"] == "no"][choix_var_num],
@@ -332,7 +338,7 @@ if page == visu:
             st.write("Il y a beaucoup de lignes dont pdays est égal à -1. Pour tous les pdays à -1, poutcome est « unknown » (8 324 valeurs). Pour poutcome à « unknown » (8 863 valeurs au total), pdays varie entre -1 et 391.")
             st.write("Nous posons le postulat de départ suivant : pdays à -1 et donc par déduction poutcome à « unknown » indique que le client n’a jamais été contacté auparavant pour une campagne précédente. Il s’agit de nouveaux prospects.")
         if choix_var_num == "previous":
-#           Histogramme previous / deposit
+            #Histogramme previous / deposit
             fig_var_num_deposit = go.Figure()
             fig_var_num_deposit.add_trace(go.Histogram(
                 x=df_bank[df_bank["deposit"] == "no"][df_bank["previous"]<10][choix_var_num],
@@ -362,7 +368,7 @@ if page == visu:
             st.write("Une grande partie des souscriptions lors de cette campagne ont été réalisées par des nouveaux prospects. Néanmoins, le ratio souscription/non-souscription est plus intéressant pour les clients ayant déjà été contactés lors de précédentes campagnes marketing.")
     if choix_type_var == "Variables catégorielles":
         choix_var_cat = st.selectbox("Choisissez la variable catégorielle à afficher :", (var_cat))
-#       Histogramme variable catégorielle / deposit
+        #Histogramme variable catégorielle / deposit
         if choix_var_cat not in ("day", "month"):
             fig_var_cat_deposit = go.Figure()
             fig_var_cat_deposit.add_trace(go.Histogram(
@@ -395,7 +401,7 @@ if page == visu:
             st.write("Les retraités et étudiants semblent le plus sensibles à la question du dépôt à terme. Cela conforte notre analyse basée sur l’âge (moins de 29 ans et plus de 60 ans).")
         if choix_var_cat == "education":
             st.write("Les clients issus d’études tertiaires semblent plus intéressés par la souscription d’un dépôt à terme.")
-#           Répartition job par niveau d'éducation
+            #Répartition job par niveau d'éducation
             colors = ["#19D3F3", "#4B4B4B", "#1E90FF", "#060808"]
             category_order = ["primary", "secondary", "tertiary", "unknown"]
             fig_educ_job = go.Figure()
@@ -435,7 +441,7 @@ if page == visu:
         if choix_var_cat == "contact":
             st.write("Proportion largement majoritaire de téléphones mobiles, la catégorie « unknown » emporte beaucoup de non-souscriptions. Dans une société où le téléphone portable prime largement sur la ligne fixe et où un certain nombre de ménages ne disposent même pas d’un téléphone fixe et fonctionnent uniquement par téléphone portable, on peut se poser la question de la pertinence de cette variable. Nous faisons le choix de la supprimer du dataset.")
         if choix_var_cat == "day":
-#           Histogramme deposit / jour de l'appel
+            #Histogramme deposit / jour de l'appel
             fig_day_deposit = go.Figure()
             fig_day_deposit.add_trace(go.Histogram(
                 x=df_bank[df_bank["deposit"] == "no"][choix_var_cat],
@@ -464,8 +470,8 @@ if page == visu:
             st.plotly_chart(fig_day_deposit)
             st.write("Certains jours du mois semblent plus favorables au démarchage : les 4 premiers jours du mois, le 10 et le 30 de chaque mois.")
         if choix_var_cat == "month":
-#           Histogramme deposit / mois de l'appel
-#           Création d'un ordre calendaire pour clarifier le graphique suivant
+            #Histogramme deposit / mois de l'appel
+            #Création d'un ordre calendaire pour clarifier le graphique suivant
             month_order = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
             df_bank['month'] = pd.Categorical(df_bank['month'], categories=month_order, ordered=True)
             df_bank['month_numeric'] = df_bank['month'].cat.codes
@@ -505,8 +511,7 @@ if page == visu:
             st.write("La variable deposit est notre variable cible. Sa distribution est très équilibrée, et elle ne comprend aucune valeur manquante. Elle ne nécessite donc aucun retraitement.")
 
 
-
-# Mise en place du tronc commun à tous nos tests de machine learning
+#Instanciation des modèles
 
 le = LabelEncoder()
 ohe = OneHotEncoder(drop = "first")
@@ -516,8 +521,9 @@ num_scaler = RobustScaler()
 models = {
         "CatBoost" : CatBoostClassifier(silent = True),  # 'silent=True' pour éviter les logs
         "Random Forest": RandomForestClassifier(),
-        "Extreme Gradient Boost" : XGBClassifier(),
+        "Extreme Gradient Boost" : XGBClassifier()
         }
+
 
 
 if page == modelisation:
@@ -572,7 +578,7 @@ if page == ml:
     y_train = le.fit_transform(y_train)
     y_test = le.transform(y_test)
     resultats = []
-    features = {}
+#    features = {}
     best_params_list = {}
 #    """
 #        Attribuer à num_test la valeur du test souhaité
@@ -629,22 +635,30 @@ if page == ml:
     else:
         print("Test manquant !")
     for model_name, model in models.items():
-        test_path = build_ml_path / f"test{num_test}" 
-        model_file = test_path / f"ml_test{num_test}_{model_name}_model.pkl"
-        with open(model_file, "rb") as f:
-            model = pickle.load(f)
+        test_path = build_ml_path / f"test_{num_test}" 
+        pickle_path = test_path / f"ml_{num_test}_{model_name}_model.pkl"
+#        model_file = test_path / f"ml_test{num_test}_{model_name}_model.pkl"
+        with open(pickle_path, "rb") as f:
+            best_model = pickle.load(f)
+#        with open(model_file, "rb") as f:
+#            model = pickle.load(f)
         st.write("#### Modèle testé : " + model_name)
         if optimisation_hyperparam == "Oui" :
-            params_file = test_path / f"ml_test{num_test}_{model_name}_best_params.pkl"
-            with open(params_file, "rb") as f:
-                best_params = pickle.load(f)
-            best_params_list[model_name] = best_params
+#            params_file = test_path / f"ml_test{num_test}_{model_name}_best_params.pkl"
+#            with open(params_file, "rb") as f:
+#                best_params = pickle.load(f)
+            if hasattr(best_model, "best_params_"):
+                best_params_list[model_name] = best_model.best_params_
+            else:
+                best_params = best_model.get_params()
+#            best_params_list[model_name] = best_params
             st.write("Meilleurs hyperparamètres pour le modèle ", model_name)
-            st.write(best_params)
+            st.write(best_model)
+#            st.write(best_params)
         else:
             st.write("Aucun hyperparamètre n'a été optimisé pour ce test.")
-        y_pred_train = model.predict(X_train_prepro)
-        y_pred_test = model.predict(X_test_prepro)
+        y_pred_train = best_model.predict(X_train_prepro)
+        y_pred_test = best_model.predict(X_test_prepro)
         f1 = f1_score(y_test, y_pred_test)
         precision = precision_score(y_test, y_pred_test)
         recall = recall_score(y_test, y_pred_test)
@@ -656,59 +670,108 @@ if page == ml:
             })
         st.write("Variables les plus importantes du modèle ", model_name)
         nom_var = prepro.get_feature_names_out()
-        if hasattr(model, "feature_importances_"):
-            importance = model.feature_importances_
-            data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Variables", ascending = False)
-            top_data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Importance", ascending = False)
-            st.dataframe(top_data_importances.head(5))
+        if hasattr(best_model, "feature_importances_") or hasattr(best_model, "coef_"):
+            if hasattr(best_model, "feature_importances_"):
+                importance = best_model.feature_importances_
+            elif hasattr(best_model, "coef_"):
+                coef = best_model.coef_
+                if coef.ndim == 1:
+                    coef = coef.reshape(1, -1)
+                importance = coef[0]
+            data_importances = pd.DataFrame({"Variables": nom_var, "Importance": importance}).sort_values(by="Importance", ascending=False)
+            top_data_importances = data_importances.head(5)
+            st.dataframe(top_data_importances)
             top_data_importances["Color"] = top_data_importances["Variables"].apply(lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
-            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Top 5 des variables du modèle " + model_name)
+            fig = px.bar(top_data_importances, x="Variables", y="Importance", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title=f"Top 5 des variables du modèle {model_name}")
             fig.update_layout(showlegend=False)
             st.plotly_chart(fig)
-            for feature, importance in zip(nom_var, importance):
-                if feature not in features:
-                    features[feature] = {}
-                features[feature][model_name] = importance
-        elif model_name == "Logistic Regression":
-            coef = model.coef_
-            if coef.ndim == 1:  # Si c'est un tableau 1D (ce qui arrive parfois en classification binaire)
-                coef = coef.reshape(1, -1)
-            coef = coef[0]
-            data_importances = pd.DataFrame({"Variables": nom_var, "Coefficient": coef})
-            data_importances["Importance"] = data_importances["Coefficient"].abs()
-            data_importances = data_importances.sort_values(by = "Variables", ascending = False)
-            top_data_importances = data_importances.sort_values(by = "Importance", ascending = False)
-            st.dataframe(top_data_importances.head(5))
-            top_data_importances["Color"] = top_data_importances["Variables"].apply(lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
-            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Top 5 des variables du modèle " + model_name)
-            fig.update_layout(showlegend=False)
-            st.plotly_chart(fig)
-            for feature, importance in zip(nom_var, data_importances["Importance"]):
-                if feature not in features:
-                    features[feature] = {}
-                features[feature][model_name] = importance
+#        if hasattr(best_model, "feature_importances_"):
+#            importance = best_model.feature_importances_
+#            data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Variables", ascending = False)
+#            top_data_importances = pd.DataFrame({"Variables" : nom_var, "Importance" : importance}).sort_values(by = "Importance", ascending = False)
+#            st.dataframe(top_data_importances.head(5))
+#            top_data_importances["Color"] = top_data_importances["Variables"].apply(lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
+#            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Top 5 des variables du modèle " + model_name)
+#            fig.update_layout(showlegend=False)
+#            st.plotly_chart(fig)
+#            for feature, importance in zip(nom_var, importance):
+#                if feature not in features:
+#                    features[feature] = {}
+#                features[feature][model_name] = importance
+#        elif model_name == "Logistic Regression":
+#            coef = model.coef_
+#            if coef.ndim == 1:  # Si c'est un tableau 1D (ce qui arrive parfois en classification binaire)
+#                coef = coef.reshape(1, -1)
+#            coef = coef[0]
+#            data_importances = pd.DataFrame({"Variables": nom_var, "Coefficient": coef})
+#            data_importances["Importance"] = data_importances["Coefficient"].abs()
+#            data_importances = data_importances.sort_values(by = "Variables", ascending = False)
+#            top_data_importances = data_importances.sort_values(by = "Importance", ascending = False)
+#            st.dataframe(top_data_importances.head(5))
+#            top_data_importances["Color"] = top_data_importances["Variables"].apply(lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
+#            fig = px.bar(top_data_importances.head(5), x="Variables", y="Importance", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Top 5 des variables du modèle " + model_name)
+#            fig.update_layout(showlegend=False)
+#            st.plotly_chart(fig)
+#            for feature, importance in zip(nom_var, data_importances["Importance"]):
+#                if feature not in features:
+#                    features[feature] = {}
+#                features[feature][model_name] = importance
         else:
             st.write("Ce modèle ne possède pas d'attribut feature_importances_ ou coef_")
-#       Interprétabilité avec SHAP
-        if model_name in ["Extreme Gradient Boost", "CatBoost"]:
-            explainer = shap.TreeExplainer(model)
-            shap_values = explainer.shap_values(X_test_prepro)
-            mean_shap_values = pd.DataFrame(shap_values, columns=nom_var).abs().mean()
+        #Interprétabilité avec SHAP
+        test_graphs_folder = Path(build_graphs_path / f"test_{num_test}" / "plot_shap")
+        graph_shap = Image.open(test_graphs_folder / f"graph_shap_{model_name}.png")
+        st.image(graph_shap, use_column_width=True)
+#        if len(X_test_prepro.shape) == 3:
+#            X_test_prepro = X_test_prepro.reshape(X_test_prepro.shape[0], -1)  
+#        if isinstance(X_test_prepro, csr_matrix):  
+#            X_test_prepro = X_test_prepro.toarray()  
+#        if isinstance(X_test_prepro, np.ndarray): 
+#            X_test_prepro = pd.DataFrame(X_test_prepro, columns=prepro.get_feature_names_out())
+#        if X_test_prepro.shape[0] > 1000:  
+#            X_test_prepro = X_test_prepro.sample(n=1000, random_state=42)
+#        explainer = shap.TreeExplainer(best_model)
+#        shap_values = explainer.shap_values(X_test_prepro)
+#        if isinstance(shap_values, list):
+#            shap_values = shap_values[0]  
+#        if len(shap_values.shape) == 3:
+#            shap_values = shap_values.mean(axis=2)
+#        mean_shap_values = pd.DataFrame(shap_values, columns=prepro.get_feature_names_out()).abs().mean()
+#        top_5_shap = mean_shap_values.nlargest(5)
+#        top_shap_importances = pd.DataFrame({'Variables': top_5_shap.index, 'Importance SHAP': top_5_shap.values})
+#        st.write("Interprétabilité avec SHAP")
+#        st.dataframe(top_shap_importances)
+#        top_shap_importances["Color"] = top_shap_importances["Variables"].apply(
+#            lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
+#        fig = px.bar(
+#            top_shap_importances, 
+#            x="Variables", y="Importance SHAP", 
+#            color="Color", 
+#            color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"},
+#            title=f"Interprétabilité avec SHAP - Top 5 des variables du modèle {model_name}"
+#            )
+#        fig.update_layout(showlegend=False)
+#        st.plotly_chart(fig)
+
+#        if model_name in ["Extreme Gradient Boost", "CatBoost"]:
+#            explainer = shap.TreeExplainer(model)
+#            shap_values = explainer.shap_values(X_test_prepro)
+#            mean_shap_values = pd.DataFrame(shap_values, columns=nom_var).abs().mean()
 #           explainer = shap.Explainer(model, X_train_prepro)
 #           shap_values = explainer(X_test_prepro)
 #           mean_shap_values = pd.DataFrame(shap_values.values, columns=nom_var).abs().mean()
-            top_5_shap = mean_shap_values.nlargest(5)
-            top_shap_importances = pd.DataFrame({'Variables': top_5_shap.index, 'Importance SHAP': top_5_shap.values})
-            st.write("Interprétabilité avec SHAP")
-            st.dataframe(top_shap_importances)
-            top_shap_importances["Color"] = top_shap_importances["Variables"].apply(lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
-            fig = px.bar(top_shap_importances, x="Variables", y="Importance SHAP", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Interprétabilité avec SHAP - Top 5 des variables du modèle " + model_name)
-            fig.update_layout(showlegend=False)
-            st.plotly_chart(fig)
+#            top_5_shap = mean_shap_values.nlargest(5)
+#            top_shap_importances = pd.DataFrame({'Variables': top_5_shap.index, 'Importance SHAP': top_5_shap.values})
+#            st.write("Interprétabilité avec SHAP")
+#            st.dataframe(top_shap_importances)
+#            top_shap_importances["Color"] = top_shap_importances["Variables"].apply(lambda x: "deep_blue" if x == "numerical__duration" else "light_blue")
+#            fig = px.bar(top_shap_importances, x="Variables", y="Importance SHAP", color="Color", color_discrete_map={"deep_blue": "#005780", "light_blue": "#19D3F3"}, title="Interprétabilité avec SHAP - Top 5 des variables du modèle " + model_name)
+#            fig.update_layout(showlegend=False)
+#            st.plotly_chart(fig)
 #            full_path = build_graphs_path / f"graph_var_shap_{model_name}.png"
 #            st.image(str(full_path), caption=f"Graphique de l'interprétabilité des variables pour le modèle {model_name}", use_column_width=True)
-        else:
-            st.write("L'interprétabilité n'a pas été réalisée pour ce test.")
+#        else:
+#            st.write("L'interprétabilité n'a pas été réalisée pour ce test.")
     st.write("#### Récapitulatif des meilleurs hyperparamètres")
     if optimisation_hyperparam == "Oui":
         for model_name, params in best_params_list.items():
