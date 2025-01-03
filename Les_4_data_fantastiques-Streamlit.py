@@ -18,13 +18,9 @@ from sklearn.compose import ColumnTransformer
 import shap
 import pickle
 
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier, Pool
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn import neighbors
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from pathlib import Path
 from PIL import Image
@@ -412,7 +408,7 @@ if page == visu:
             st.write("La variable job comprend très peu de valeurs « unknown » (70 lignes pour une volumétrie totale de plus de 11 000 lignes). Etant donné le faible impact de ces lignes, nous pouvons simplement les supprimer.")
             st.write("Les retraités et étudiants semblent le plus sensibles à la question du dépôt à terme. Cela conforte notre analyse basée sur l’âge (moins de 29 ans et plus de 60 ans).")
         if choix_var_cat == "education":
-            st.write("Les clients issus d’études tertiaires semblent plus intéressés par la souscription d’un dépôt à terme.")
+            st.write("Les clients issus d’études supérieures semblent plus intéressés par la souscription d’un dépôt à terme.")
             # Répartition job par niveau d'éducation
             colors = ["#19D3F3", "#4B4B4B", "#1E90FF", "#060808"]
             category_order = ["primary", "secondary", "tertiary", "unknown"]
@@ -436,7 +432,7 @@ if page == visu:
                 showlegend=True
                 )
             st.plotly_chart(fig_educ_job)
-            st.write("Les variables job et educations semblent corrélées entre elles. Pour chaque job, une donnée education semble ressortir clairement de manière générale.")
+            st.write("Les variables job et education semblent corrélées entre elles. Pour chaque job, une donnée education semble ressortir clairement de manière générale.")
             st.write("Le résultat est plus mitigé pour les retraités et entrepreneurs, mais le nombre de clients issus de ces catégories semble suffisamment faible pour pouvoir en faire abstraction.")
             st.write("Nous pouvons donc en conclure que la variable education, lorsqu’elle est manquante dans le dataset, peut être déduite de la variable job.")
             st.write("Modalités les plus fréquentes de education par job :")
@@ -533,34 +529,9 @@ num_scaler = RobustScaler()
 models = {
         "CatBoost" : CatBoostClassifier(silent = True),  # 'silent=True' pour éviter les logs
         "Random Forest": RandomForestClassifier(),
-        "Extreme Gradient Boost" : XGBClassifier(),
-        "Gradient Boost" : GradientBoostingClassifier(),
-        "Logistic Regression": LogisticRegression(max_iter = 1000),
-        "Decision Tree Classifier": DecisionTreeClassifier(),
-        "Decision Tree Regressor": DecisionTreeRegressor(),
-        "SVM": SVC(),
-        "KNN" : neighbors.KNeighborsClassifier()
+        "Extreme Gradient Boost" : XGBClassifier()
         }
-
-# Définition des hyperparamètres à tester pour chaque modèle
-param_grid = {
-            'Random Forest': {
-                            'n_estimators': [50, 100, 200],
-                            'max_depth': [None, 5, 10, 20],
-                            'min_samples_split': [2, 5, 10]
-                            },
-            'Extreme Gradient Boost': {
-                            'n_estimators': [100, 200, 300],
-                            'learning_rate': [0.01, 0.1, 0.2],
-                            'max_depth': [3, 5, 7]
-                            },
-            'CatBoost': {
-                            'iterations': [100, 200, 300],
-                            'learning_rate': [0.01, 0.1, 0.2],
-                            'depth': [6, 8, 10]
-                            }
-            }
-
+        
 
 if page == modelisation:
     st.header(modelisation)
@@ -667,7 +638,7 @@ if page == ml:
         with open(model_file, "rb") as f:
             model = pickle.load(f)
         st.write("#### Modèle testé : " + model_name)
-        if optimisation_hyperparam == "Oui" and (model_name in param_grid) :
+        if optimisation_hyperparam == "Oui":
             params_file = test_path / f"ml_test{num_test}_{model_name}_best_params.pkl"
             with open(params_file, "rb") as f:
                 best_params = pickle.load(f)

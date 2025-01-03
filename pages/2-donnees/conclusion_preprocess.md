@@ -4,7 +4,7 @@ Nous disposons d’ores et déjà de certaines informations nous permettant de c
 * âgé de moins de 29 ans ou plus de 60 ans,
 * célibataire,
 * étudiant ou retraité
-* issu un cursus d’études du domaine tertiaire
+* issu d'un cursus d’études supérieures
 * ayant quelques économies personnelles
 * n’ayant aucun crédit en cours
 * ayant déjà été contacté lors d’une campagne précédente mais ayant eu lieu il y a moins de 200 jours
