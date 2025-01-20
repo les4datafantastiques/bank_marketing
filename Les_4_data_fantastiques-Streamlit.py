@@ -796,7 +796,7 @@ if page == outil:
         df_pred.loc[0,"pdays"] = (choix_date_contact_prevu - choix_date_contact_prec).days
         df_pred.loc[0,"previous"] = choix_previous
         df_pred.loc[0,"poutcome"] = choix_poutcome
-    df_pred = df_pred.applymap(traduction_anglais)
+    df_pred = df_pred.map(traduction_anglais)
     model_name = "CatBoost"
     if df_pred["duration"][0] == "unknown":
         num_test = 5
