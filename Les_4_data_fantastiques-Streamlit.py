@@ -154,9 +154,9 @@ def banniere(texte_banniere):
 
 if page == projet:
     st.header(projet)
-    st.markdown("<br>" * 2, unsafe_allow_html=True)
-    st.image(banniere_projet, use_container_width=True)
-    st.markdown("<br>" * 3, unsafe_allow_html=True)
+#    st.markdown("<br>" * 2, unsafe_allow_html=True)
+#    st.image(banniere_projet, use_container_width=True)
+#    st.markdown("<br>" * 3, unsafe_allow_html=True)
     st.markdown(txt_projet)
 
 
@@ -535,9 +535,9 @@ models = {
 
 if page == modelisation:
     st.header(modelisation)
-    st.markdown("<br>" * 2, unsafe_allow_html=True)
-    st.image(banniere_modelisation, use_container_width=True)
-    st.markdown("<br>" * 3, unsafe_allow_html=True)
+#    st.markdown("<br>" * 2, unsafe_allow_html=True)
+#    st.image(banniere_modelisation, use_container_width=True)
+#    st.markdown("<br>" * 3, unsafe_allow_html=True)
     st.markdown(txt_classif_choix)
     st.markdown(txt_interpretation)
 
@@ -863,8 +863,8 @@ if page == outil:
 
 if page == conclusion:
     st.header(conclusion)
-    st.markdown("<br>" * 2, unsafe_allow_html=True)
-    st.image(banniere_conclusion, use_container_width=True)
-    st.markdown("<br>" * 3, unsafe_allow_html=True)
+#    st.markdown("<br>" * 2, unsafe_allow_html=True)
+#    st.image(banniere_conclusion, use_container_width=True)
+#    st.markdown("<br>" * 3, unsafe_allow_html=True)
     st.markdown(txt_conclusion_generale)
 
